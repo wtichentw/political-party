@@ -6,6 +6,7 @@
     <script src="js/phaser.min.js"></script>
     <script src="js/boot.js"></script>
     <script src="js/intro.js"></script>
+    <script src="js/main_menu.js"></script>
     <title>政治派對</title>
   </head>
   <body>
@@ -15,6 +16,7 @@
 
         game.state.add("Boot", Boot);
         game.state.add("Intro", Intro);
+        game.state.add("MainMenu", MainMenu);
 
         game.state.start("Boot");
       })();

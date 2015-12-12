@@ -8,5 +8,23 @@ Intro.prototype = {
     var introVideo = this.game.add.video("introVideo");
     introVideo.play();
     introVideo.addToWorld();
+    introVideo.onComplete.add(function() {
+      this.game.state.start("MainMenu");
+    }, this);
+
+    var skipText = this.game.add.text(
+      this.game.width - 50,
+      this.game.height - 30,
+      "Skip",
+      {
+        font: "16px Arial",
+        fill: "#FFFFFF"
+      }
+    );
+    skipText.inputEnabled = true;
+    skipText.events.onInputDown.add(function() {
+      introVideo.stop();
+      this.game.state.start("MainMenu");
+    }, this);
   }
 };
