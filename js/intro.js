@@ -18,7 +18,7 @@ Intro.prototype = {
       "Skip",
       {
         font: "16px Arial",
-        fill: "#FFFFFF"
+        fill: "#868988"
       }
     );
     skipText.inputEnabled = true;
