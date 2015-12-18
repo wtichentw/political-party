@@ -8,6 +8,7 @@
     <script src="js/boot.js"></script>
     <script src="js/intro.js"></script>
     <script src="js/main_menu.js"></script>
+    <script src="js/shake_hand.js"></script>
     <title>政治派對</title>
   </head>
   <body>
@@ -18,6 +19,9 @@
         game.state.add("Boot", Boot);
         game.state.add("Intro", Intro);
         game.state.add("MainMenu", MainMenu);
+
+        game.state.add("ShakeHandIntro", ShakeHand.Intro);
+        game.state.add("ShakeHandGame", ShakeHand.Game);
 
         game.state.start("Boot");
       })();

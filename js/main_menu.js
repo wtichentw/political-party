@@ -36,6 +36,7 @@ MainMenu.prototype = {
     var images = [imagePig, imageHorse, imageEng, imageShi, imageRose];
     for (var i = 0; i < images.length; ++i) {
       images[i].inputEnabled = true;
+
       images[i].events.onInputOver.add(function() {
         this.y -= 20;
       }, images[i]);
@@ -43,5 +44,9 @@ MainMenu.prototype = {
         this.y += 20;
       }, images[i]);
     }
+
+    images[3].events.onInputDown.add(function() {
+      this.game.state.start("ShakeHandIntro");
+    }, images[3]);
   },
 };
