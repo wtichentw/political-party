@@ -45,7 +45,15 @@ var MainMenu = function(game) {};
         }, images[i]);
 
         images[0].events.onInputDown.add(function() {
-          this.game.state.start("SitTightIntro");
+          this.game.state.start(
+            "StageIntro",
+            true,
+            false,
+            {
+              titleText: "第二話｜做好做滿",
+              subtitleText: "在我任期內，一定會做好做滿。"
+            }
+          );
         }, images[0]);
       }
     },
