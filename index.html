@@ -8,8 +8,12 @@
     <script src="js/boot.js"></script>
     <script src="js/intro.js"></script>
     <script src="js/main_menu.js"></script>
+<<<<<<< HEAD
+    <script src="js/shake_hand.js"></script>
+=======
     <script src="js/stage_intro.js"></script>
     <script src="js/sit_tight.js"></script>
+>>>>>>> 6955f2493070e4ed6febe2411404bcc8973a9a06
     <title>政治派對</title>
   </head>
   <body>
@@ -22,6 +26,9 @@
         game.state.add("MainMenu", MainMenu);
         game.state.add("StageIntro", StageIntro);
         game.state.add("SitTightGame", SitTightGame);
+
+        game.state.add("ShakeHandIntro", ShakeHand.Intro);
+        game.state.add("ShakeHandGame", ShakeHand.Game);
 
         game.state.start("Boot");
       })();
