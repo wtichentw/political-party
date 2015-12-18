@@ -3,12 +3,82 @@ SitTightGame = function(game) {};
 (function() {
 
   var imagePig;
+  var sitSpeed = 1;
+
+  var keyText;
+  // 我是朱立倫
+  var keys = [
+    {
+      text: "j",
+      key: Phaser.KeyCode.J
+    },
+    {
+      text: "i",
+      key: Phaser.KeyCode.I
+    },
+    {
+      text: "3",
+      key: Phaser.KeyCode.THREE
+    },
+    {
+      text: "g",
+      key: Phaser.KeyCode.G
+    },
+    {
+      text: "4",
+      key: Phaser.KeyCode.FOUR
+    },
+    {
+      text: "5",
+      key: Phaser.KeyCode.FIVE
+    },
+    {
+      text: "j",
+      key: Phaser.KeyCode.J
+    },
+    {
+      text: "空白鍵",
+      key: Phaser.KeyCode.SPACEBAR
+    },
+    {
+      text: "x",
+      key: Phaser.KeyCode.X
+    },
+    {
+      text: "u",
+      key: Phaser.KeyCode.U
+    },
+    {
+      text: "4",
+      key: Phaser.KeyCode.FOUR
+    },
+    {
+      text: "x",
+      key: Phaser.KeyCode.X
+    },
+    {
+      text: "j",
+      key: Phaser.KeyCode.J
+    },
+    {
+      text: "p",
+      key: Phaser.KeyCode.P
+    },
+    {
+      text: "6",
+      key: Phaser.KeyCode.SIX
+    },
+  ];
+  var keysIdx = 0;
 
   SitTightGame.prototype = {
 
     preload: function() {
 
       game.load.image("SitTightPig", "media/sit_tight/pig.png");
+
+      // Reset keyIdx to 0
+      keysIdx = 0;
 
     },
 
@@ -49,22 +119,47 @@ SitTightGame = function(game) {};
       graphicsLayer.add(graphics);
       graphicsLayer.z = 1;
 
+      // Draw HUD
+      keyText = game.add.text(
+        100,
+        100,
+        keys[keysIdx].text,
+        {
+          font: "40px Arial",
+          fill: "#000000"
+        }
+      );
+
+      var HUDLayer = game.add.group();
+      HUDLayer.add(keyText);
+      HUDLayer.z = 2;
+
     },
 
     update: function() {
 
-      var sitSpeed = 1;
+      if (keysIdx == keys.length) {
+        alert("恭喜你坐好，坐滿");
+        game.state.start("MainMenu");
+        return;
+      }
 
       if (imagePig.y > gameHeight - imagePig.height) {
         imagePig.y -= sitSpeed;
       } else {
         alert("請坐好，坐滿");
         game.state.start("MainMenu");
+        return;
       }
 
-      var key = Phaser.Keyboard.DOWN;
-      if (game.input.keyboard.isDown(key) && imagePig.y < gameHeight - 300) {
-        imagePig.y += (sitSpeed + 1);
+      if (game.input.keyboard.isDown(keys[keysIdx].key) && imagePig.y < gameHeight - 300) {
+        imagePig.y += (sitSpeed + 20);
+        ++keysIdx;
+        if (keysIdx == keys.length) {
+          keyText.setText("");
+        } else {
+          keyText.setText(keys[keysIdx].text);
+        }
       }
 
     }
