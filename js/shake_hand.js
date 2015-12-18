@@ -1,52 +1,13 @@
-var ShakeHand = {};
+var ShakeHandGame = function (game) {};
 
 (function () {
-	// ---------- Global Constant
 
-	// ---------- Intro
-	var landingPage;
-
-	ShakeHand.Intro = function (game) {};
-	ShakeHand.Intro.prototype = {
-		preload: function () {
-			game = this.game;
-
-			game.load.image("landingPage", "media/stage_intro.png");
-		},
-		create: function () {
-			game.stage.backgroundColor = '#FFFFFF';
-
-			landingPage = game.add.image(0, 0, "landingPage");
-			landingPage.inputEnabled = true;
-			landingPage.scale.set(game.width/landingPage.width);
-			landingPage.events.onInputDown.add(function() {
-	      game.state.start("ShakeHandGame");
-	    }, landingPage);
-
-		var skipText = this.game.add.text(
-      this.game.width/2- 120,
-      this.game.height - 100,
-      "第一話 | 馬習會",
-      {
-        font: "40px PingFang-UltraLight",
-        fill: "#000000"
-      }
-    );
-
-		// small 20px
-		// tiny 15px
-		},
-		update: function () {
-
-		}
-	};
 	// ---------- Game
 	var timer = 0;
 	var mics = [];
 	var micMaxY, micMinY;
 	var shakeHandSprite;
-	ShakeHand.Game = function (game) {};
-	ShakeHand.Game.prototype = {
+	ShakeHandGame.prototype = {
 		preload: function () {
 			game = this.game;
 

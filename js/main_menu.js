@@ -56,6 +56,19 @@ var MainMenu = function(game) {};
             }
           );
         }, images[0]);
+
+        images[3].events.onInputDown.add(function() {
+          this.game.state.start(
+            "StageIntro",
+            true,
+            false,
+            {
+              titleText: "第一話｜馬習會",
+              subtitleText: "我的一小握，是台灣的一大握",
+              stageKey: "ShakeHandGame"
+            }
+          );
+        }, images[3]);
       }
     },
   };
