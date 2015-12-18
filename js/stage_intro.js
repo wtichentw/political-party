@@ -10,12 +10,15 @@ var StageIntro = function(game) {};
   var continueText;
   var alphaStep = 0.02;
 
+  var stageKey = "";
+
   StageIntro.prototype = {
 
     init: function(args) {
 
       titleText = args.titleText;
       subtitleText = args.subtitleText;
+      stageKey = args.stageKey;
 
     },
 
@@ -85,7 +88,7 @@ var StageIntro = function(game) {};
 
       // Press spacebar to continue to the game
       if (game.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
-        game.state.start("SitTightGame");
+        game.state.start(stageKey);
       }
 
     }

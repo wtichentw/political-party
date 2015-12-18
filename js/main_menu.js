@@ -51,7 +51,8 @@ var MainMenu = function(game) {};
             false,
             {
               titleText: "第二話｜做好做滿",
-              subtitleText: "在我任期內，一定會做好做滿。"
+              subtitleText: "在我任期內，一定會做好做滿。",
+              stageKey: "SitTightGame"
             }
           );
         }, images[0]);
