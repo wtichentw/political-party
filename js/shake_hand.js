@@ -11,10 +11,11 @@ var ShakeHandGame = function (game) {};
 		preload: function () {
 			game = this.game;
 
-			game.load.image("mic1", "media/shake_hand/mic1.png");
-			game.load.image("mic2", "media/shake_hand/mic2.png");
-			game.load.image("mic3", "media/shake_hand/mic3.png");
-			game.load.image("mic4", "media/shake_hand/mic4.png");
+			// game.load.image("mic1", "media/shake_hand/mic1.png");
+			// game.load.image("mic2", "media/shake_hand/mic2.png");
+			// game.load.image("mic3", "media/shake_hand/mic3.png");
+			// game.load.image("mic4", "media/shake_hand/mic4.png");
+			game.load.image("background", "media/shake_hand/bg.png");
 			game.load.spritesheet("shakeHandSprite", "media/shake_hand/shake_hand_628x417.png", 628, 417, 4);
 		},
 		create: function () {
@@ -24,12 +25,13 @@ var ShakeHandGame = function (game) {};
 			micMinY = screenHeight - 380;
 			game.stage.backgroundColor = "#FFFFFF";
 
-			for (var i = 0; i < 4; i++) {
-				mics[i] = game.add.image(250 + i*100, screenHeight - 330, "mic" + (i+1));
-				mics[i].scale.set(0.2);
-			}
+			game.add.image(0, 0, "background");
+			// for (var i = 0; i < 4; i++) {
+			// 	mics[i] = game.add.image(250 + i*100, screenHeight - 330, "mic" + (i+1));
+			// 	mics[i].scale.set(0.2);
+			// }
 
-			shakeHandSprite = game.add.sprite(screenWidth/2 - 628/2, 0, "shakeHandSprite");
+			shakeHandSprite = game.add.sprite(screenWidth/2 - 628/2, 150, "shakeHandSprite");
 			shakeHandSprite.animations.add("shake");
 			shakeHandSprite.smoothed = true;
 			shakeHandSprite.animations.play("shake", 3, true);
