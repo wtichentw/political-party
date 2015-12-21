@@ -76,6 +76,8 @@ SitTightGame = function(game) {};
     preload: function() {
 
       game.load.image("SitTightPig", "media/sit_tight/pig.png");
+      game.load.image("SitTightBg", "media/sit_tight/bg.png");
+      game.load.image("SitTightTable", "media/sit_tight/table.png");
 
       // Reset keyIdx to 0
       keysIdx = 0;
@@ -85,6 +87,13 @@ SitTightGame = function(game) {};
     create: function() {
 
       game.stage.setBackgroundColor(0xFFFFFF);
+
+      // Draw background
+      var imageBg = game.add.image(0, 0, "SitTightBg");
+
+      var bgLayer = game.add.group();
+      bgLayer.add(imageBg);
+      bgLayer.z = 0;
 
       // Draw Mr.Pig first to make him under the desk
       var pigWidth = 529;
@@ -97,7 +106,7 @@ SitTightGame = function(game) {};
 
       var pigLayer = game.add.group();
       pigLayer.add(imagePig);
-      pigLayer.z = 0;
+      pigLayer.z = 1;
 
       var graphics = game.add.graphics(0, 0);
 
@@ -117,7 +126,7 @@ SitTightGame = function(game) {};
 
       var graphicsLayer = game.add.group();
       graphicsLayer.add(graphics);
-      graphicsLayer.z = 1;
+      graphicsLayer.z = 2;
 
       // Draw HUD
       keyText = game.add.text(
