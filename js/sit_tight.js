@@ -77,7 +77,7 @@ SitTightGame = function(game) {};
 
       game.load.image("SitTightPig", "media/sit_tight/pig.png");
       game.load.image("SitTightBg", "media/sit_tight/bg.png");
-      game.load.image("SitTightTable", "media/sit_tight/table.png");
+      game.load.image("SitTightDesk", "media/sit_tight/desk.png");
 
       // Reset keyIdx to 0
       keysIdx = 0;
@@ -111,22 +111,12 @@ SitTightGame = function(game) {};
       var graphics = game.add.graphics(0, 0);
 
       // Draw desk
-      graphics.beginFill(0xC16A38, 1);
-      var deskWidth = 500;
-      var deskHeight = 200;
-      var deskX = gameWidth / 2 - deskWidth / 2;
-      var deskY = gameHeight - deskHeight;
-      graphics.drawRect(deskX, deskY, deskWidth, deskHeight);
-      var deskTopWidth = deskWidth + 20 * 2;
-      var deskTopHeight = 20;
-      var deskTopX = gameWidth / 2 - deskTopWidth / 2;
-      var deskTopY = deskY - deskTopHeight;
-      graphics.drawRect(deskTopX, deskTopY, deskTopWidth, deskTopHeight);
-      graphics.endFill();
+      var imageDesk = game.add.image(gameWidth / 2, gameHeight, "SitTightDesk");
+      imageDesk.anchor.set(0.5, 1);
 
-      var graphicsLayer = game.add.group();
-      graphicsLayer.add(graphics);
-      graphicsLayer.z = 2;
+      var deskLayer = game.add.group();
+      deskLayer.add(imageDesk);
+      deskLayer.z = 2;
 
       // Draw HUD
       keyText = game.add.text(
@@ -141,7 +131,7 @@ SitTightGame = function(game) {};
 
       var HUDLayer = game.add.group();
       HUDLayer.add(keyText);
-      HUDLayer.z = 2;
+      HUDLayer.z = 3;
 
     },
 
