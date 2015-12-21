@@ -9,11 +9,11 @@ SitTightGame = function(game) {};
   // 我是朱立倫
   var keys = [
     {
-      text: "j",
+      text: "J",
       key: Phaser.KeyCode.J
     },
     {
-      text: "i",
+      text: "I",
       key: Phaser.KeyCode.I
     },
     {
@@ -21,7 +21,7 @@ SitTightGame = function(game) {};
       key: Phaser.KeyCode.THREE
     },
     {
-      text: "g",
+      text: "G",
       key: Phaser.KeyCode.G
     },
     {
@@ -33,7 +33,7 @@ SitTightGame = function(game) {};
       key: Phaser.KeyCode.FIVE
     },
     {
-      text: "j",
+      text: "J",
       key: Phaser.KeyCode.J
     },
     {
@@ -41,11 +41,11 @@ SitTightGame = function(game) {};
       key: Phaser.KeyCode.SPACEBAR
     },
     {
-      text: "x",
+      text: "X",
       key: Phaser.KeyCode.X
     },
     {
-      text: "u",
+      text: "U",
       key: Phaser.KeyCode.U
     },
     {
@@ -53,15 +53,15 @@ SitTightGame = function(game) {};
       key: Phaser.KeyCode.FOUR
     },
     {
-      text: "x",
+      text: "X",
       key: Phaser.KeyCode.X
     },
     {
-      text: "j",
+      text: "J",
       key: Phaser.KeyCode.J
     },
     {
-      text: "p",
+      text: "P",
       key: Phaser.KeyCode.P
     },
     {
@@ -71,11 +71,19 @@ SitTightGame = function(game) {};
   ];
   var keysIdx = 0;
 
+  var graphics;
+  var keyboardWidth;
+  var keyboardHeight;
+  var keyboardX;
+  var keyboardY;
+
   SitTightGame.prototype = {
 
     preload: function() {
 
       game.load.image("SitTightPig", "media/sit_tight/pig.png");
+      game.load.image("SitTightBg", "media/sit_tight/bg.png");
+      game.load.image("SitTightDesk", "media/sit_tight/desk.png");
 
       // Reset keyIdx to 0
       keysIdx = 0;
@@ -85,6 +93,13 @@ SitTightGame = function(game) {};
     create: function() {
 
       game.stage.setBackgroundColor(0xFFFFFF);
+
+      // Draw background
+      var imageBg = game.add.image(0, 0, "SitTightBg");
+
+      var bgLayer = game.add.group();
+      bgLayer.add(imageBg);
+      bgLayer.z = 0;
 
       // Draw Mr.Pig first to make him under the desk
       var pigWidth = 529;
@@ -97,42 +112,49 @@ SitTightGame = function(game) {};
 
       var pigLayer = game.add.group();
       pigLayer.add(imagePig);
-      pigLayer.z = 0;
-
-      var graphics = game.add.graphics(0, 0);
+      pigLayer.z = 1;
 
       // Draw desk
-      graphics.beginFill(0xC16A38, 1);
-      var deskWidth = 500;
-      var deskHeight = 200;
-      var deskX = gameWidth / 2 - deskWidth / 2;
-      var deskY = gameHeight - deskHeight;
-      graphics.drawRect(deskX, deskY, deskWidth, deskHeight);
-      var deskTopWidth = deskWidth + 20 * 2;
-      var deskTopHeight = 20;
-      var deskTopX = gameWidth / 2 - deskTopWidth / 2;
-      var deskTopY = deskY - deskTopHeight;
-      graphics.drawRect(deskTopX, deskTopY, deskTopWidth, deskTopHeight);
-      graphics.endFill();
+      var imageDesk = game.add.image(gameWidth / 2, gameHeight, "SitTightDesk");
+      imageDesk.anchor.set(0.5, 1);
 
-      var graphicsLayer = game.add.group();
-      graphicsLayer.add(graphics);
-      graphicsLayer.z = 1;
+      var deskLayer = game.add.group();
+      deskLayer.add(imageDesk);
+      deskLayer.z = 2;
 
       // Draw HUD
+      var initialKeyboardWidth = 70;
+      var initialKeyboardHeight = initialKeyboardWidth;
+      var initialKeyboardX = 100;
+      var initialKeyboardY = 100;
+
       keyText = game.add.text(
-        100,
-        100,
-        keys[keysIdx].text,
+        initialKeyboardX + initialKeyboardWidth / 2,
+        initialKeyboardY + initialKeyboardHeight / 2,
+        "J",
         {
           font: "40px Arial",
-          fill: "#000000"
+          fill: "#FFFFFF"
         }
       );
+      keyText.anchor.set(0.5);
+
+      graphics = game.add.graphics(0, 0);
+
+      graphics.beginFill(0x333333);
+      graphics.drawRoundedRect(
+        initialKeyboardX,
+        initialKeyboardY,
+        initialKeyboardWidth,
+        initialKeyboardHeight,
+        10
+      );
+      graphics.endFill();
 
       var HUDLayer = game.add.group();
+      HUDLayer.add(graphics);
       HUDLayer.add(keyText);
-      HUDLayer.z = 2;
+      HUDLayer.z = 3;
 
     },
 
@@ -151,6 +173,27 @@ SitTightGame = function(game) {};
         game.state.start("MainMenu");
         return;
       }
+
+      keyboardWidth = 70;
+      keyboardHeight = 70;
+      keyboardX = keyText.x - keyboardWidth / 2;
+      keyboardY = keyText.y - keyboardHeight / 2;
+
+      if (keys[keysIdx].key == Phaser.KeyCode.SPACEBAR) {
+        keyboardWidth = keyText.width + 40;
+        keyboardX = keyText.x - keyboardWidth / 2;
+      }
+
+      graphics.clear();
+      graphics.beginFill(0x333333);
+      graphics.drawRoundedRect(
+        keyboardX,
+        keyboardY,
+        keyboardWidth,
+        keyboardHeight,
+        10
+      );
+      graphics.endFill();
 
       if (game.input.keyboard.isDown(keys[keysIdx].key) && imagePig.y < gameHeight - 300) {
         imagePig.y += (sitSpeed + 20);
