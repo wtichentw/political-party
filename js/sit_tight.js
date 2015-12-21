@@ -131,7 +131,7 @@ SitTightGame = function(game) {};
       keyText = game.add.text(
         initialKeyboardX + initialKeyboardWidth / 2,
         initialKeyboardY + initialKeyboardHeight / 2,
-        "J",
+        keys[keysIdx].text,
         {
           font: "40px Arial",
           fill: "#FFFFFF"
@@ -155,6 +155,14 @@ SitTightGame = function(game) {};
       HUDLayer.add(graphics);
       HUDLayer.add(keyText);
       HUDLayer.z = 3;
+
+      var time_interval = 2000;
+      game.time.events.loop(time_interval, function() {
+        ++keysIdx;
+        if (keysIdx != keys.length) {
+          keyText.setText(keys[keysIdx].text);
+        }
+      });
 
     },
 
@@ -196,13 +204,7 @@ SitTightGame = function(game) {};
       graphics.endFill();
 
       if (game.input.keyboard.isDown(keys[keysIdx].key) && imagePig.y < gameHeight - 300) {
-        imagePig.y += (sitSpeed + 20);
-        ++keysIdx;
-        if (keysIdx == keys.length) {
-          keyText.setText("");
-        } else {
-          keyText.setText(keys[keysIdx].text);
-        }
+        imagePig.y += (sitSpeed + 1);
       }
 
     }
