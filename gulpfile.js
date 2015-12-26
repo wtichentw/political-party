@@ -47,14 +47,28 @@ gulp.task("indexHTML", function() {
 gulp.task("stylesheets", function() {
   gulp.src(paths.stylesheets)
     .pipe(concat("bundle.css"))
-    .pipe(gulp.dest(paths.dist + "/css"));
+    .pipe(gulp.dest(paths.dist + "/css"))
+    .pipe(connect.reload());
 });
 
 gulp.task("scripts", function() {
   gulp.src(paths.scripts)
     .pipe(uglify())
     .pipe(concat("bundle.js"))
-    .pipe(gulp.dest(paths.dist + "/js"));
+    .pipe(gulp.dest(paths.dist + "/js"))
+    .pipe(connect.reload());
 });
 
-gulp.task("default", ["fonts", "images", "videos", "indexHTML", "stylesheets", "scripts"]);
+gulp.task("connect", function() {
+  connect.server({
+    root: "./dist",
+    livereload: true
+  });
+});
+
+gulp.task("watch", function() {
+  gulp.watch(paths.stylesheets, ["stylesheets"]);
+  gulp.watch(paths.scripts, ["scripts"]);
+});
+
+gulp.task("default", ["fonts", "images", "videos", "indexHTML", "stylesheets", "scripts", "connect", "watch"]);
