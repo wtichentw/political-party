@@ -3,7 +3,7 @@ var Intro = function(game) {};
 (function() {
   Intro.prototype = {
     preload: function() {
-      game.load.video("introVideo", "media/intro.webm");
+      game.load.video("introVideo", "videos/intro.webm");
     },
     create: function() {
       var introVideo = game.add.video("introVideo");
