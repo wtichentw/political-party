@@ -69,13 +69,16 @@ SitTightGame = function(game) {};
       key: Phaser.KeyCode.SIX
     },
   ];
-  var keysIdx = 0;
+  var keysIdx;
 
   var graphics;
   var keyboardWidth;
   var keyboardHeight;
   var keyboardX;
   var keyboardY;
+
+  var isStageStarted;
+  var isTimerStarted;
 
   SitTightGame.prototype = {
 
@@ -85,8 +88,9 @@ SitTightGame = function(game) {};
       game.load.image("SitTightBg", "media/sit_tight/bg.png");
       game.load.image("SitTightDesk", "media/sit_tight/desk.png");
 
-      // Reset keyIdx to 0
       keysIdx = 0;
+      isStageStarted = false;
+      isTimerStarted = false;
 
     },
 
@@ -156,11 +160,38 @@ SitTightGame = function(game) {};
       HUDLayer.add(keyText);
       HUDLayer.z = 3;
 
-      var time_interval = 2000;
-      game.time.events.loop(time_interval, function() {
-        ++keysIdx;
-        if (keysIdx != keys.length) {
-          keyText.setText(keys[keysIdx].text);
+      var introGraphics = game.add.graphics(0, 0);
+
+      introGraphics.beginFill(0x000000, 0.5);
+      introGraphics.drawRect(0, 0, gameWidth, gameHeight);
+      introGraphics.endFill();
+
+      var startGameRect = new Phaser.Rectangle(gameWidth / 2 - 100, gameHeight - 200, 200, 50);
+      introGraphics.beginFill(0xFBE400);
+      introGraphics.drawRect(startGameRect.x, startGameRect.y, startGameRect.width, startGameRect.height);
+      introGraphics.endFill();
+
+      var startGameText = game.add.text(
+        startGameRect.x + startGameRect.width / 2,
+        startGameRect.y + startGameRect.height / 2,
+        "開始遊戲",
+        {
+          font: "25px Arial",
+          color: "#000000"
+        }
+      );
+      startGameText.anchor.set(0.5);
+
+      var introLayer = game.add.group();
+      introLayer.add(introGraphics);
+      introLayer.add(startGameText);
+      introLayer.z = 4;
+
+      introGraphics.inputEnabled = true;
+      introGraphics.events.onInputDown.add(function() {
+        if (startGameRect.contains(game.input.x, game.input.y)) {
+          isStageStarted = true;
+          introLayer.removeAll();
         }
       });
 
@@ -168,43 +199,57 @@ SitTightGame = function(game) {};
 
     update: function() {
 
-      if (keysIdx == keys.length) {
-        alert("恭喜你坐好，坐滿");
-        game.state.start("MainMenu");
-        return;
-      }
+      if (isStageStarted) {
 
-      if (imagePig.y > gameHeight - imagePig.height) {
-        imagePig.y -= sitSpeed;
-      } else {
-        alert("請坐好，坐滿");
-        game.state.start("MainMenu");
-        return;
-      }
+        if (!isTimerStarted) {
+          var time_interval = 2000;
+          game.time.events.loop(time_interval, function() {
+            ++keysIdx;
+            if (keysIdx != keys.length) {
+              keyText.setText(keys[keysIdx].text);
+            }
+          });
+          isTimerStarted = true;
+        }
 
-      keyboardWidth = 70;
-      keyboardHeight = 70;
-      keyboardX = keyText.x - keyboardWidth / 2;
-      keyboardY = keyText.y - keyboardHeight / 2;
+        if (keysIdx == keys.length) {
+          alert("恭喜你坐好，坐滿");
+          game.state.start("MainMenu");
+          return;
+        }
 
-      if (keys[keysIdx].key == Phaser.KeyCode.SPACEBAR) {
-        keyboardWidth = keyText.width + 40;
+        if (imagePig.y > gameHeight - imagePig.height) {
+          imagePig.y -= sitSpeed;
+        } else {
+          alert("請坐好，坐滿");
+          game.state.start("MainMenu");
+          return;
+        }
+
+        keyboardWidth = 70;
+        keyboardHeight = 70;
         keyboardX = keyText.x - keyboardWidth / 2;
-      }
+        keyboardY = keyText.y - keyboardHeight / 2;
 
-      graphics.clear();
-      graphics.beginFill(0x333333);
-      graphics.drawRoundedRect(
-        keyboardX,
-        keyboardY,
-        keyboardWidth,
-        keyboardHeight,
-        10
-      );
-      graphics.endFill();
+        if (keys[keysIdx].key == Phaser.KeyCode.SPACEBAR) {
+          keyboardWidth = keyText.width + 40;
+          keyboardX = keyText.x - keyboardWidth / 2;
+        }
 
-      if (game.input.keyboard.isDown(keys[keysIdx].key) && imagePig.y < gameHeight - 300) {
-        imagePig.y += (sitSpeed + 1);
+        graphics.clear();
+        graphics.beginFill(0x333333);
+        graphics.drawRoundedRect(
+          keyboardX,
+          keyboardY,
+          keyboardWidth,
+          keyboardHeight,
+          10
+        );
+        graphics.endFill();
+
+        if (game.input.keyboard.isDown(keys[keysIdx].key) && imagePig.y < gameHeight - 300) {
+          imagePig.y += (sitSpeed + 1);
+        }
       }
 
     }
