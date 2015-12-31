@@ -53,8 +53,8 @@ var ShakeHandGame = function (game) {};
 		preload: function () {
 			game = this.game;
 
-			game.load.image("background", "images/shake_hand/bg.png");
-			game.load.spritesheet("shakeHandSprite", "images/shake_hand/shake_hand_628x417.png", 628, 417, 4);
+			game.load.image("background", "media/shake_hand/bg.png");
+			game.load.spritesheet("shakeHandSprite", "media/shake_hand/shake_hand_628x417.png", 628, 417, 4);
 		},
 		create: function () {
 			screenHeight = game.height;

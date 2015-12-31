@@ -8,16 +8,14 @@ var MainMenu = function(game) {};
   var imageRose;
 
   MainMenu.prototype = {
-
     preload: function() {
-      game.load.image("mainMenuBg", "images/main_menu/main_menu_bg.jpg");
-      game.load.image("mainMenuPig", "images/main_menu/pig.png");
-      game.load.image("mainMenuHorse", "images/main_menu/horse.png");
-      game.load.image("mainMenuEng", "images/main_menu/eng.png");
-      game.load.image("mainMenuShi", "images/main_menu/shi.png");
-      game.load.image("mainMenuRose", "images/main_menu/rose.png");
+      game.load.image("mainMenuBg", "media/main_menu/main_menu_bg.jpg");
+      game.load.image("mainMenuPig", "media/main_menu/pig.png");
+      game.load.image("mainMenuHorse", "media/main_menu/horse.png");
+      game.load.image("mainMenuEng", "media/main_menu/eng.png");
+      game.load.image("mainMenuShi", "media/main_menu/shi.png");
+      game.load.image("mainMenuRose", "media/main_menu/rose.png");
     },
-
     create: function() {
       game.add.image(0, 0, "mainMenuBg");
 
@@ -72,9 +70,6 @@ var MainMenu = function(game) {};
           );
         }, images[3]);
       }
-
-    }
-
+    },
   };
-
-}());
+})();

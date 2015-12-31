@@ -24,7 +24,7 @@ var StageIntro = function(game) {};
 
     preload: function() {
 
-      game.load.image("stageIntro", "images/stage_intro.png");
+      game.load.image("stageIntro", "media/stage_intro.png");
 
     },
 

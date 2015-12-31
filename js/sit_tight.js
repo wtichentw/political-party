@@ -84,9 +84,9 @@ SitTightGame = function(game) {};
 
     preload: function() {
 
-      game.load.image("SitTightPig", "images/sit_tight/pig.png");
-      game.load.image("SitTightBg", "images/sit_tight/bg.png");
-      game.load.image("SitTightDesk", "images/sit_tight/desk.png");
+      game.load.image("SitTightPig", "media/sit_tight/pig.png");
+      game.load.image("SitTightBg", "media/sit_tight/bg.png");
+      game.load.image("SitTightDesk", "media/sit_tight/desk.png");
 
       keysIdx = 0;
       isStageStarted = false;
