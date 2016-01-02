@@ -130,6 +130,8 @@ SitTightGame = function(game) {};
     連天公伯都不會原諒你。」\n\
     這段話讓我非常感動！";
 
+  var bgm;
+
   var imagePig;
 
   var keyText;
@@ -148,6 +150,8 @@ SitTightGame = function(game) {};
 
     preload: function() {
 
+      game.load.audio("SitTightBGM", "media/sit_tight/bgm.mp3");
+
       game.load.image("SitTightPig", "media/sit_tight/pig.png");
       game.load.image("SitTightBg", "media/sit_tight/bg.png");
       game.load.image("SitTightDesk", "media/sit_tight/desk.png");
@@ -164,6 +168,9 @@ SitTightGame = function(game) {};
     create: function() {
 
       game.stage.setBackgroundColor(0xFFFFFF);
+
+      bgm = game.add.audio("SitTightBGM", 1, true);
+      bgm.play();
 
       // Draw background
       var imageBg = game.add.image(0, 0, "SitTightBg");
@@ -359,6 +366,7 @@ SitTightGame = function(game) {};
           imagePig.y -= sitSpeed;
         } else {
           alert("請坐好，坐滿");
+          bgm.stop();
           game.state.start("MainMenu");
           return;
         }
