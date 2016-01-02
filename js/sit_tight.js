@@ -121,6 +121,15 @@ SitTightGame = function(game) {};
     "啊啊啊！快站起來了！"
   ];
 
+  var grandmaWords =
+    "記得有一次到淡水去拜拜的時候\n\
+    一個阿嬤跟我說：\n\
+    「市長，你一定要出來選。」\n\
+    我說：「我已經承諾所有辛北市民\n\
+    阿嬤跟我說：「你如果不出來，\n\
+    連天公伯都不會原諒你。」\n\
+    這段話讓我非常感動！";
+
   var imagePig;
 
   var keyText;
@@ -132,7 +141,6 @@ SitTightGame = function(game) {};
   var isTimerStarted;
 
   var sitSpeed = 1;
-  var numSitTight = 0;
 
   var isBlahLayerExist;
 
@@ -146,7 +154,7 @@ SitTightGame = function(game) {};
       game.load.image("SitTightDialog", "media/sit_tight/dialog.png");
       game.load.image("SitTightGrandma", "media/sit_tight/grandma.png");
 
-      keysIdx = game.rnd.between(0, keys.length);
+      keysIdx = game.rnd.between(0, keys.length - 1);
 
       isStageStarted = false;
       isTimerStarted = false;
@@ -240,7 +248,7 @@ SitTightGame = function(game) {};
         if (!isTimerStarted) {
           var KEY_CHANGE_INTERVAL = 2000;
           game.time.events.loop(KEY_CHANGE_INTERVAL, function() {
-            keysIdx = game.rnd.between(0, keys.length);
+            keysIdx = game.rnd.between(0, keys.length - 1);
             keyText.setText(keys[keysIdx].text);
 
             var BLAH_TEXT_X = imagePig.x + 400;
@@ -265,7 +273,7 @@ SitTightGame = function(game) {};
             blahLayer.z = 5;
 
             isBlahLayerExist = true;
-            var BLAH_DISAPPEAR_INTERVAL = 2000;
+            var BLAH_DISAPPEAR_INTERVAL = 1500;
             game.time.events.add(BLAH_DISAPPEAR_INTERVAL, function() {
               blahLayer.destroy();
               isBlahLayerExist = false;
@@ -284,9 +292,9 @@ SitTightGame = function(game) {};
           );
           warningText.alpha = 0.0;
           warningText.anchor.set(0.5);
-          var GRANDMA_INTERVAL = 20000;
+          var GRANDMA_INTERVAL = 10000;
           game.time.events.add(GRANDMA_INTERVAL, function() {
-            game.add.tween(warningText).to(
+            var warningTextTween = game.add.tween(warningText).to(
               {
                 alpha: 1
               },
@@ -297,6 +305,51 @@ SitTightGame = function(game) {};
               10,
               true
             );
+            warningTextTween.onComplete.add(function() {
+              var imageGrandma = game.add.image(0, gameHeight, "SitTightGrandma");
+              imageGrandma.scale.set(0.5);
+              imageGrandma.anchor.set(0.5, 1);
+              var imageGrandmaTween = game.add.tween(imageGrandma).to(
+                {
+                  x: gameWidth + imageGrandma.width / 2
+                },
+                5000,
+                "Linear",
+                true
+              );
+              imageGrandmaTween.onComplete.add(function() {
+                game.time.removeAll();
+                isStageStarted = false;
+                var graphics = game.add.graphics(0, 0);
+                graphics.beginFill(0x000000, 0.5);
+                graphics.drawRect(0, 0, gameWidth, gameHeight);
+                graphics.endFill();
+                var grandmaText = game.add.text(
+                  gameWidth / 2,
+                  gameHeight,
+                  grandmaWords,
+                  {
+                    font: "60px Arial",
+                    fill: "#FFFFFF"
+                  }
+                );
+                grandmaText.anchor.set(0.5, 1);
+                var grandmaTextTween = game.add.tween(grandmaText).to(
+                  {
+                    y: 0
+                  },
+                  15000,
+                  "Linear",
+                  true
+                );
+                grandmaTextTween.onComplete.add(function() {
+                  graphics.clear();
+                  imagePig.y -= 200;
+                  isStageStarted = true;
+                  isTimerStarted = false;
+                }, grandmaTextTween);
+              }, imageGrandmaTween);
+            }, warningTextTween);
           });
 
           isTimerStarted = true;
