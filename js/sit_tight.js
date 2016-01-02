@@ -272,6 +272,33 @@ SitTightGame = function(game) {};
             });
 
           });
+
+          var warningText = game.add.text(
+            gameWidth / 2,
+            gameHeight / 2,
+            "WARNING",
+            {
+              font: "200px Arial",
+              fill: "#FF0000"
+            }
+          );
+          warningText.alpha = 0.0;
+          warningText.anchor.set(0.5);
+          var GRANDMA_INTERVAL = 20000;
+          game.time.events.add(GRANDMA_INTERVAL, function() {
+            game.add.tween(warningText).to(
+              {
+                alpha: 1
+              },
+              200,
+              "Linear",
+              true,
+              0,
+              10,
+              true
+            );
+          });
+
           isTimerStarted = true;
         }
 
