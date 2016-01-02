@@ -52,7 +52,15 @@ var MainMenu = function(game) {};
             {
               titleText: "第二話｜做好做滿",
               subtitleText: "在我任期內，一定會做好做滿。",
-              stageKey: "SitTightGame"
+              nextState: {
+                key: "IntroVideo",
+                args: {
+                  videoPath: "media/sit_tight/intro.webm",
+                  nextState: {
+                    key: "SitTightGame"
+                  }
+                }
+              }
             }
           );
         }, images[0]);
@@ -65,7 +73,9 @@ var MainMenu = function(game) {};
             {
               titleText: "第一話｜馬習會",
               subtitleText: "我的一小握，是台灣的一大握",
-              stageKey: "ShakeHandGame"
+              nextState: {
+                key: "ShakeHandGame"
+              }
             }
           );
         }, images[3]);

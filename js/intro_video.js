@@ -1,16 +1,37 @@
-var Intro = function(game) {};
+var IntroVideo = function(game) {};
 
 (function() {
-  Intro.prototype = {
-    preload: function() {
-      game.load.video("introVideo", "media/intro.webm");
+
+  var videoPath;
+  var nextState;
+
+  IntroVideo.prototype = {
+
+    init: function(args) {
+
+      videoPath = args.videoPath;
+      nextState = args.nextState;
+
     },
+
+    preload: function() {
+
+      game.load.video("introVideo", videoPath);
+
+    },
+
     create: function() {
+
       var introVideo = game.add.video("introVideo");
       introVideo.addToWorld();
       introVideo.play();
       introVideo.onComplete.add(function() {
-        this.game.state.start("MainMenu");
+        this.game.state.start(
+          nextState.key,
+          true,
+          false,
+          nextState.args
+        );
       }, introVideo);
 
       var skipText = game.add.text(
@@ -25,8 +46,16 @@ var Intro = function(game) {};
       skipText.inputEnabled = true;
       skipText.events.onInputDown.add(function() {
         introVideo.stop();
-        this.game.state.start("MainMenu");
+        this.game.state.start(
+          nextState.key,
+          true,
+          false,
+          nextState.args
+        );
       }, skipText);
+
     }
+
   };
-})();
+
+}());
