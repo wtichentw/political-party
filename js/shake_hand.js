@@ -2,11 +2,12 @@ var ShakeHandGame = function (game) {};
 
 (function () {
 	// ---------- Game
-	var second = 10, times = 30;
+	var second = 10, timesCur = 30, timesMax = 100;
 	var screenWidth, screenHeight;
 	var secondText, timesText, promptText;
 	var shakeHandSprite;
-	var keyPairsSwitch = 0, keyPairsIdx = 1, keyPairsRndGap = 5;
+	var barColors = [], barGraphics, barColorsGap = 80, barGraphicsHeight = 2;
+	var keyPairsSwitch = 0, keyPairsIdx = 1, keyPairsRndGap = 5, keysRect;
 	var keyPairs = [
 		[
 			{
@@ -61,7 +62,7 @@ var ShakeHandGame = function (game) {};
 			screenWidth  = game.width;
 			// ----- Config
 			second = 30;
-			times = 30;
+			timesCur = timesMax;
 			keyPairsIdx = game.rnd.integerInRange(0, keyPairs.length - 1);
 
 			game.stage.backgroundColor = "#FFFFFF";
@@ -75,27 +76,46 @@ var ShakeHandGame = function (game) {};
 			changeKPTimer.start();
 			restSecTimer.start();
 
-			promptText	= game.add.text(screenWidth - 100, 30, keyPairs[keyPairsIdx][keyPairsSwitch].text, {font: "28px Arial", fill: "#FFFFFF"});
-			timesText 	= game.add.text(50, 30, times, {font: "28px Arial", fill: "#FFFFFF"});
+			//keysRect = new Phaser.Rectangle(screenWidth - 130, 120, 70, 70);
+
+			promptText	= game.add.text(screenWidth - 130, 120, keyPairs[keyPairsIdx][keyPairsSwitch].text, {font: "40px Arial", fill: "#FFFFFF"});
+			//timesText 	= game.add.text(50, 30, timesCur, {font: "28px Arial", fill: "#FFFFFF"});
 			secondText 	= game.add.text(50, 90, second, {font: "28px Arial", fill: "#FFFFFF"});
 
 			shakeHandSprite = game.add.sprite(screenWidth/2 - 628/2, 150, "shakeHandSprite");
 			shakeHandSprite.animations.add("shake");
 			shakeHandSprite.animations.play("shake", 3, true);
+
+			barGraphics = game.add.graphics(950, 420);
+			for (var i = 0; i < barColorsGap; i++) {
+				barColors[i] = Phaser.Color.interpolateColor(0x00FF00, 0xFFFF00, barColorsGap, i);
+				barColors[i+barColorsGap] = Phaser.Color.interpolateColor(0xFFFF00, 0xFF0000, barColorsGap, i);
+			}
+
 		},
 		update: function () {
+
+			barGraphics.clear();
+			for (var i = 0; i < (barColorsGap*timesCur/timesMax); i++) {
+	      	barGraphics.beginFill(barColors[i], 1);
+		      barGraphics.drawRect(0, i*barGraphicsHeight*-1, 50, barGraphicsHeight);
+		      barGraphics.endFill();
+			}
+
 			game.input.keyboard.onDownCallback = function (e) {
+
 				if (e.keyCode == keyPairs[keyPairsIdx][keyPairsSwitch].code) {
 					keyPairsSwitch = 1 - keyPairsSwitch;
-					times--;
+					timesCur--;
 
-					if (times == 0) winGame();
+					if (timesCur == 0) winGame();
 
 				} else {
-					times++;
+					timesCur++;
 				}
 
 			}
+
 			updateText();
 		}
 	};
@@ -110,7 +130,7 @@ var ShakeHandGame = function (game) {};
 
 	function updateText () {
 		promptText.setText(keyPairs[keyPairsIdx][keyPairsSwitch].text);
-		timesText.setText(times);
+		//timesText.setText(timesCur);
 		secondText.setText((restSecTimer.duration/1000).toFixed(2));
 	}
 
