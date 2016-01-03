@@ -11,14 +11,16 @@ SlapDeskGame = function(game) {};
 	var isDelayRaiseHand = false;
 
 	// objects variables
-	var velocity = 1500;
+	var objects = ["objA", "objB", "objC"];
+	var objStartPosX = 1300, objStartPosY = 450, objEndPosX = 20;
+	var oriObjMovePeriod = 2500, objMovePeriod = 2500, objMovePeriodOffset = 500;
 	var currentObjects = [];
 
 	// time and score
 	var timePosX = 950, timePosY = 50, scorePosX = 950, scorePosY = 120;
-	var time = 30;
+	var time = 40;
 	var score = 0;
-	var scoreHit = 10, scoreMiss = -5;
+	var scoreHit = [10, 10, 10], scoreMiss = -5;
 	var showScorePosX = 185, showScorePosY = 200, showScorePosEndY = 100;
 
 	SlapDeskGame.prototype = {
@@ -108,8 +110,16 @@ function slap() {
 		var posX = currentObjects[i].position.x;
 		if (posX > slapAreaXPos-slapAreaRangeOffset && posX < slapAreaXPos+slapAreaRangeOffset) {
 			console.log("Slap Hit");
+
 			// add score
-			adjustScore(scoreHit);
+			var hitScore;
+			for (j in objects) { // find correspond score
+				if (objects[j] == currentObjects[i].key) {
+					hitScore = scoreHit[j];
+					break;
+				}
+			}
+			adjustScore(hitScore);
 
 			// destroy object and generate splash
 			var splash = game.add.sprite(currentObjects[i].position.x, currentObjects[i].position.y, "objDisappear");
@@ -153,39 +163,41 @@ function updateCounter() {
 	
 	// time counter
 	time--;
-}
+	if (time <= 0) {
+		time = 0;
 
-function generateObject() {
-	var randNum = game.rnd.integerInRange(0, 2);
-	
-	switch (randNum) {
-		case 0:
-			objA = game.add.sprite(1000, 450, "objA");
-	    	objATween = game.add.tween(objA).to({x: 20}, velocity);
-	    	objectsLayer.add(objA);
-	    	// objATween.onComplete.add(destroyItSelf, this); ///
-	    	objATween.start();
-	    	return objA;
-			break;
-		case 1:
-			objB = game.add.sprite(1000, 450, "objB");
-	    	objBTween = game.add.tween(objB).to({x: 20}, velocity);
-	    	objectsLayer.add(objB);///
-	    	objBTween.start();
-	    	return objB;
-			break;
-		case 2:
-			objC = game.add.sprite(1000, 450, "objC");
-	    	objCTween = game.add.tween(objC).to({x: 20}, velocity);
-	    	objectsLayer.add(objC);
-	    	objCTween.start();
-	    	return objC;
-			break;
+		// End
 	}
 }
 
-function destroyItSelf(obj) {
-	console.log("on complete "+obj);
+function generateObject() {
+	var randNum = game.rnd.integerInRange(0, objects.length-1);
+	var obj = game.add.sprite(objStartPosX, objStartPosY, objects[randNum]); // random a object
+
+	// object move
+	// random objects move period(sec)
+	objMovePeriod = oriObjMovePeriod+game.rnd.integerInRange(-objMovePeriodOffset, objMovePeriodOffset);
+	if (time == 25) { // speed up, score up
+		console.log("Time == 25, Speed up");
+		oriObjMovePeriod -= objMovePeriodOffset;
+		for (var i in scoreHit) scoreHit[i] += 5; // improve score
+	}
+	if (time == 10) { // speed up, scroe up
+		console.log("Time == 10, Speed up");
+		oriObjMovePeriod -= objMovePeriodOffset;
+		for (var i in scoreHit) scoreHit[i] += 5; // improve score
+	}
+
+	objTween = game.add.tween(obj).to({x: objEndPosX}, objMovePeriod);
+	objectsLayer.add(obj);
+	objTween.onComplete.add(onComplete, this, obj);
+	objTween.start();
+	return obj;
 }
+
+function onComplete(obj) {
+	destroyTween = game.add.tween(obj).to({alpha: 0}, 500, "Linear", true); // fade out
+}
+
 
 })();
