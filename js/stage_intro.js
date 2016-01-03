@@ -2,15 +2,14 @@ var StageIntro = function(game) {};
 
 (function() {
 
-  var imageIntro;
+  var titleText;
+  var subtitleText;
+  var nextState;
 
-  var titleText = "";
-  var subtitleText = "";
+  var imageIntro;
 
   var continueText;
   var alphaStep = 0.02;
-
-  var stageKey = "";
 
   StageIntro.prototype = {
 
@@ -18,7 +17,7 @@ var StageIntro = function(game) {};
 
       titleText = args.titleText;
       subtitleText = args.subtitleText;
-      stageKey = args.stageKey;
+      nextState = args.nextState;
 
     },
 
@@ -88,7 +87,12 @@ var StageIntro = function(game) {};
 
       // Press spacebar to continue to the game
       if (game.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
-        game.state.start(stageKey);
+        game.state.start(
+          nextState.key,
+          true,
+          false,
+          nextState.args
+        );
       }
 
     }

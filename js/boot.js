@@ -15,6 +15,16 @@ Boot.prototype = {
     game.scale.pageAlignHorizontally = true;
     game.scale.pageAlignVertically = true;
 
-    game.state.start("Intro");
+    game.state.start(
+      "IntroVideo",
+      true,
+      false,
+      {
+        videoPath: "media/intro.webm",
+        nextState: {
+          key: "MainMenu",
+        }
+      }
+    );
   }
 };
