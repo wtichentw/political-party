@@ -6,11 +6,12 @@
     <link rel="stylesheet" href="css/main.css" />
     <script src="js/phaser.min.js"></script>
     <script src="js/boot.js"></script>
-    <script src="js/intro.js"></script>
+    <script src="js/intro_video.js"></script>
     <script src="js/main_menu.js"></script>
     <script src="js/stage_intro.js"></script>
     <script src="js/shake_hand.js"></script>
     <script src="js/sit_tight.js"></script>
+    <script src="js/flappy_pig.js"></script>
     <title>政治派對</title>
   </head>
   <body>
@@ -19,11 +20,12 @@
         var game = new Phaser.Game(1280, 720, Phaser.AUTO);
 
         game.state.add("Boot", Boot);
-        game.state.add("Intro", Intro);
+        game.state.add("IntroVideo", IntroVideo);
         game.state.add("MainMenu", MainMenu);
         game.state.add("StageIntro", StageIntro);
         game.state.add("SitTightGame", SitTightGame);
         game.state.add("ShakeHandGame", ShakeHandGame);
+        game.state.add("FlappyPig", FlappyPig);
 
         game.state.start("Boot");
       })();
