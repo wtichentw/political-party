@@ -7,7 +7,8 @@ var FlappyPig = function (game) {};
   var pillarCount = 0;
   var scoreText;
   var uiGroup;
-  var spawnPipeEvent;
+  var spawnPipeEvent, scaleUpEvent;
+  var keyJump;
 
   const PillarPos = {
     Bottom: 0,
@@ -21,17 +22,20 @@ var FlappyPig = function (game) {};
 
   const VELOCITY_SCALE = 1.5;
 
-  const MOVE_VELOCITY = -80*VELOCITY_SCALE;
+  var moveVelocity = -80*VELOCITY_SCALE;
   const PIPE_SPAWN_TIME = 1.4*VELOCITY_SCALE;
+  const SPEED_UP_TIME = 5, SCALE_UP_TIME = 2, SCALEUP_COUNT = 20;
+
+  var charScaling = 1, charScalingUpParam = 0.05;
 
   function spawnCharacter() {
     var spr = game.add.sprite(200, 200, 'character');
     game.physics.enable(spr, Phaser.Physics.ARCADE);
-    const scale = 2;
-    spr.scale.setTo(scale, scale);
+    const sprWidth = spr.body.width;
+    const sprHeight = spr.body.height;
     spr.body.collideWorldBounds = true;
     spr.body.gravity.set(0, 480);
-    spr.body.setSize(spr.body.width*.34*scale, spr.body.height*.35*scale, spr.body.width*.2*scale, 0);
+    spr.body.setSize(sprWidth*charScaling*.7, sprHeight*.45*charScaling, sprWidth*.2*charScaling, 0);
     var character = {
       spr: spr,
       isAlive: true,
@@ -62,10 +66,15 @@ var FlappyPig = function (game) {};
         spr.body.angularVelocity = 0;
         spr.body.velocity.setTo(0, 0);
         spr.body.immovable = true;
-        spr.scale.setTo(2,-2);
-        spr.body.setSize(spr.body.width*.7, spr.body.height*.35, 0, -spr.body.height);
+        spr.scale.setTo(spr.scale.x,-spr.scale.y);
+        spr.body.setSize(sprWidth*.7, sprHeight*.35, 0, 0);
+        game.input.keyboard.removeKey(Phaser.Keyboard.SPACEBAR);
+      },
+      scaleTo: (scale) => {
+        spr.scale.setTo(scale, scale);
       }
     };
+    character.scaleTo(charScaling);
     return character;
   }
 
@@ -112,12 +121,17 @@ var FlappyPig = function (game) {};
     pipes.push(topPillar);
     var bottomPillar = spawnPipe(x, PillarPos.Bottom, generatePipeHeight(undefined, PIPE_HEIGHT.TO*2-height));
     pipes.push(bottomPillar);
-    topPillar.body.velocity.setTo(MOVE_VELOCITY, 0);
-    bottomPillar.body.velocity.setTo(MOVE_VELOCITY, 0);
+    topPillar.body.velocity.setTo(moveVelocity, 0);
+    bottomPillar.body.velocity.setTo(moveVelocity, 0);
   }
 
   function spawnPipePairAuto() {
     spawnPipePair(game.width);
+  }
+
+  function scaleUp() {
+    charScaling += charScalingUpParam;
+    character.scaleTo(charScaling);
   }
 
   function stopPipes(pipes) {
@@ -130,6 +144,7 @@ var FlappyPig = function (game) {};
 
   function lostGame(obj1, obj2) {
     game.time.events.remove(spawnPipeEvent);
+    game.time.events.remove(scaleUpEvent);
     character.kill();
     stopPipes(pipes);
     stopPipes(pipesToDestroy);
@@ -154,10 +169,15 @@ var FlappyPig = function (game) {};
         spawnPipePair(game.width-(preSpawnedCount-i)*270+200);
       }
       spawnPipeEvent = game.time.events.loop(Phaser.Timer.SECOND * PIPE_SPAWN_TIME, spawnPipePairAuto, this);
+      scaleUpEvent = game.time.events.repeat(Phaser.Timer.SECOND * SCALE_UP_TIME, SCALEUP_COUNT, scaleUp, this);
       uiGroup = game.add.group();
       scoreText = game.add.text(game.width/2, 150, '', {font: 'bold 44px Arial', fill: '#fff', boundsAlignH: 'center', boundsAlignV: 'middle'});
       scoreText.setShadow(3, 3, 'rgba(0,0,0,0.3)', 2);
       uiGroup.add(scoreText);
+      keyJump = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+      keyJump.onDown.add(()=>{character.jump();}, this);
+      game.camera.follow(character.spr);
+      character.spr.body.velocity.x = 80;
     },
     update: function() {
       if(character.isAlive) {
@@ -181,13 +201,7 @@ var FlappyPig = function (game) {};
             pipesToDestroy.splice(pipesToDestroy.indexOf(pipe), 1);
           }
         }
-        if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR))
-        {
-          character.jump();
-        }
-        else {
-          character.falling();
-        }
+        character.falling();
         bg.tilePosition.x -= 0.5;
       } else {
         game.state.start('MainMenu');
