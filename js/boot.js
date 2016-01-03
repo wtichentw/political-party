@@ -15,6 +15,7 @@ Boot.prototype = {
     game.scale.pageAlignHorizontally = true;
     game.scale.pageAlignVertically = true;
 
-    game.state.start("Intro");
+    game.state.start("Sea");
+
   }
 };
