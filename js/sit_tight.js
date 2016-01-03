@@ -131,6 +131,7 @@ SitTightGame = function(game) {};
     這段話讓我非常感動！";
 
   var bgm;
+  var grandmaMusic;
 
   var imagePig;
 
@@ -151,6 +152,7 @@ SitTightGame = function(game) {};
     preload: function() {
 
       game.load.audio("SitTightBGM", "media/sit_tight/bgm.mp3");
+      game.load.audio("SitTightGrandmaMusic", "media/sit_tight/grandma_music.mp3");
 
       game.load.image("SitTightPig", "media/sit_tight/pig.png");
       game.load.image("SitTightBg", "media/sit_tight/bg.png");
@@ -171,6 +173,7 @@ SitTightGame = function(game) {};
 
       bgm = game.add.audio("SitTightBGM", 1, true);
       bgm.play();
+      grandmaMusic = game.add.audio("SitTightGrandmaMusic");
 
       // Draw background
       var imageBg = game.add.image(0, 0, "SitTightBg");
@@ -341,6 +344,8 @@ SitTightGame = function(game) {};
                   }
                 );
                 grandmaText.anchor.set(0.5, 1);
+                bgm.pause();
+                grandmaMusic.play();
                 var grandmaTextTween = game.add.tween(grandmaText).to(
                   {
                     y: 0
@@ -351,6 +356,8 @@ SitTightGame = function(game) {};
                 );
                 grandmaTextTween.onComplete.add(function() {
                   graphics.clear();
+                  grandmaMusic.stop();
+                  bgm.resume();
                   imagePig.y -= 200;
                   isStageStarted = true;
                   isTimerStarted = false;
