@@ -15,6 +15,8 @@ var MainMenu = function(game) {};
       game.load.image("mainMenuEng", "media/main_menu/eng.png");
       game.load.image("mainMenuShi", "media/main_menu/shi.png");
       game.load.image("mainMenuRose", "media/main_menu/rose.png");
+      game.load.image("mainMenuRealPig", "media/main_menu/realpig.png");
+
     },
     create: function() {
       game.add.image(0, 0, "mainMenuBg");
@@ -34,7 +36,10 @@ var MainMenu = function(game) {};
       imageRose = game.add.image(600, 100, "mainMenuRose");
       imageRose.scale.set(0.31);
 
-      var images = [imagePig, imageHorse, imageEng, imageShi, imageRose];
+      imageRealPig = game.add.image(40, 550, "mainMenuRealPig");
+      imageRealPig.scale.set(0.31);
+
+      var images = [imagePig, imageHorse, imageEng, imageShi, imageRose, imageRealPig];
       for (var i = 0; i < images.length; ++i) {
         images[i].inputEnabled = true;
         images[i].events.onInputOver.add(function() {
@@ -79,6 +84,21 @@ var MainMenu = function(game) {};
             }
           );
         }, images[3]);
+
+        images[5].events.onInputDown.add(function() {
+          this.game.state.start(
+            "StageIntro",
+            true,
+            false,
+            {
+              titleText: "第?話｜????",
+              subtitleText: "??????",
+              nextState: {
+                key: "FlappyPig"
+              }
+            }
+          );
+        }, images[5]);
       }
     },
   };

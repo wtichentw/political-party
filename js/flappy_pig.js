@@ -46,7 +46,7 @@ var FlappyPig = function (game) {};
           }
         }
         else {
-          spr.body.angularVelocity = 0; 
+          spr.body.angularVelocity = 0;
         }
         if(spr.body.rotation < -30)
           spr.body.rotation = -30;
@@ -189,6 +189,8 @@ var FlappyPig = function (game) {};
           character.falling();
         }
         bg.tilePosition.x -= 0.5;
+      } else {
+        game.state.start('MainMenu');
       }
     },
     render: function() {
