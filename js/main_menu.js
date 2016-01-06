@@ -70,6 +70,14 @@ var MainMenu = function(game) {};
           );
         }, images[0]);
 
+        images[2].events.onInputDown.add(function () {
+          //alert('ouch');
+          FB.ui({
+            method: 'share',
+            href: 'http://people.cs.nctu.edu.tw/~wtichen/fb.html',
+          }, function(response){});
+        }, images[2]);
+
         images[3].events.onInputDown.add(function() {
           this.game.state.start(
             "StageIntro",
