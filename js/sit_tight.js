@@ -1,5 +1,18 @@
 var SitTightGame = function(game) {
+
   this.game = game;
+  this.asset = new Asset(
+    this,
+    "/media/sit_tight/",
+    {
+      images: [
+        "bg.png",
+        "pig.png",
+        "desk.png"
+      ]
+    }
+  );
+
 };
 
 (function() {
@@ -50,12 +63,52 @@ var SitTightGame = function(game) {
   SitTightGame.prototype = {
 
     preload: function() {
+
+      this.asset.loadAll();
+
     },
 
     create: function() {
+
+      drawLayersInOrder(
+        [
+          [this.draw.bg.call(this)],
+          [this.draw.pig.call(this)],
+          [this.draw.desk.call(this)]
+        ],
+        this.game
+      );
+
     },
 
     update: function() {
+    },
+
+    draw: {
+
+      bg: function() {
+        var imageBg = this.game.add.image(0, 0, this.asset.getAssetKey("bg.png"));
+        imageBg.scale.set(gameWidth / imageBg.width);
+
+        return imageBg;
+      },
+
+      pig: function() {
+        var imagePig = this.game.add.image(gameWidth / 2, gameHeight, this.asset.getAssetKey("pig.png"));
+        imagePig.anchor.set(0.5, 1);
+        imagePig.scale.set((gameHeight - 100) / imagePig.height);
+
+        return imagePig;
+      },
+
+      desk: function() {
+        var imageDesk = this.game.add.image(gameWidth / 2, gameHeight, this.asset.getAssetKey("desk.png"));
+        imageDesk.anchor.set(0.5, 1);
+        imageDesk.scale.set((gameHeight - 300) / imageDesk.height);
+
+        return imageDesk;
+      }
+
     }
 
   };
