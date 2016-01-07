@@ -37,32 +37,53 @@ var SitTightGame = function(game) {
         path: "/media/sit_tight/desk.png",
         key: "SitTightDesk",
         image: {}
-      }
+      },
+      explanations: [
+        {
+          path: "/media/sit_tight/explanation1.png",
+          key: "SitTightExplanation1",
+          image: {}
+        },
+        {
+          path: "/media/sit_tight/explanation2.png",
+          key: "SitTightExplanation2",
+          image: {}
+        },
+        {
+          path: "/media/sit_tight/explanation3.png",
+          key: "SitTightExplanation3",
+          image: {}
+        }
+      ]
     },
 
     draw: {
-      bg: function(game) {
+      bg: function(stageState) {
         var imageBg = game.add.image(0, 0, "SitTightBg");
+        imageBg.scale.set(gameWidth / imageBg.width);
 
+        stageState.images.bg.image = imageBg;
         return imageBg;
       },
-      pig: function(game) {
+      pig: function(stageState) {
         var imagePig = game.add.image(gameWidth / 2, gameHeight + 200, "SitTightPig");
         imagePig.anchor.set(0.5, 1);
 
+        stageState.images.pig.image = imagePig;
         return imagePig;
       },
-      desk: function(game) {
+      desk: function(stageState) {
         var imageDesk = game.add.image(gameWidth / 2, gameHeight, "SitTightDesk");
         imageDesk.anchor.set(0.5, 1);
 
+        stageState.images.desk.image = imageDesk;
         return imageDesk;
       },
-      keyboard: function(game, text) {
+      keyboard: function(stageState, x, y, text) {
         var keyboardWidth = 70;
         var keyboardHeight = keyboardWidth;
-        var keyboardX = 100;
-        var keyboardY = 100;
+        var keyboardX = x;
+        var keyboardY = y;
 
         var graphics = game.add.graphics(0, 0);
         graphics.beginFill(0x333333);
@@ -91,6 +112,68 @@ var SitTightGame = function(game) {
         layer.add(keyText);
 
         return layer;
+      },
+      explanations: function(stageState) {
+        var layer = game.add.group();
+        var imageExplanations = [];
+        for (var i = 2; i >= 0; --i) {
+          imageExplanations[i] = game.add.image(0, 0, stageState.images.explanations[i].key);
+          imageExplanations[i].scale.set(gameWidth / imageExplanations[i].width);
+          imageExplanations[i].inputEnabled = true;
+
+          if (i === 2) {
+            imageExplanations[i].events.onInputDown.add(function() {
+              stageState.draw.countDown(stageState, 5);
+              this.destroy();
+            }, imageExplanations[i]);
+          } else {
+            imageExplanations[i].events.onInputDown.add(function() {
+              this.destroy();
+            }, imageExplanations[i]);
+          }
+
+          stageState.images.explanations[i].image = imageExplanations[i];
+          layer.add(imageExplanations[i]);
+        }
+
+        return layer;
+      },
+      countDown: function(stageState, time) {
+        for (var i = 0; i < time; ++i) {
+          game.time.events.add(
+            i * 1000,
+            function() {
+              var text = game.add.text(
+                gameWidth / 2,
+                gameHeight / 2,
+                this.currentTime,
+                {
+                  font: "150px Arial",
+                  fill: "#FF0000"
+                }
+              );
+              text.anchor.set(0.5);
+
+              var countDownTextTween = game.add.tween(text).to(
+                {
+                  alpha: 0
+                },
+                1000,
+                "Linear",
+                true
+              );
+
+              if (this.currentTime === 1) {
+                countDownTextTween.onComplete.add(function() {
+                  this.configs.isStageStarted = true;
+                }, stageState);
+              }
+            },
+            {
+              currentTime: time - i
+            }
+          );
+        }
       }
     },
 
@@ -124,7 +207,7 @@ var SitTightGame = function(game) {
         "Z": Phaser.KeyCode.Z
       },
 
-      nextKey: function() {
+      getRandomKey: function() {
         var keysKeys = Object.keys(this.keys);
         var keyText = keysKeys[game.rnd.between(0, keysKeys.length - 1)];
         return {
@@ -133,10 +216,29 @@ var SitTightGame = function(game) {
         };
       },
 
-      currentKey: {
-        text: "A",
-        key: Phaser.KeyCode.A
+      currentKeys: [],
+
+      fall: function() {
+        for (var i = 0; i < this.currentKeys.length; ++i) {
+          this.currentKeys[i].y += this.currentKeys[i].fallSpeed;
+        }
       }
+    },
+
+    pig: {
+      sitSpeed: 1,
+      sit: function(stageState) {
+        var imagePig = stageState.images.pig.image;
+        imagePig.y -= this.sitSpeed;
+      },
+      stand: function(stageState) {
+        var imagePig = stageState.images.pig.image;
+        imagePig.y += (this.sitSpeed + 1);
+      }
+    },
+
+    configs: {
+      isStageStarted: false
     },
 
     preload: function() {
@@ -147,11 +249,11 @@ var SitTightGame = function(game) {
       game.load.image(this.images.pig.key, this.images.pig.path);
       game.load.image(this.images.bg.key, this.images.bg.path);
       game.load.image(this.images.desk.key, this.images.desk.path);
+      game.load.image(this.images.explanations[0].key, this.images.explanations[0].path);
+      game.load.image(this.images.explanations[1].key, this.images.explanations[1].path);
+      game.load.image(this.images.explanations[2].key, this.images.explanations[2].path);
       // game.load.image("SitTightDialog", "media/sit_tight/dialog.png");
       // game.load.image("SitTightGrandma", "media/sit_tight/grandma.png");
-      // game.load.image("SitTightExplanation1", this.explanations.imagePaths[0]);
-      // game.load.image("SitTightExplanation2", this.explanations.imagePaths[1]);
-      // game.load.image("SitTightExplanation3", this.explanations.imagePaths[2]);
 
     },
 
@@ -164,23 +266,24 @@ var SitTightGame = function(game) {
 
       // this.background.audio.play();
 
-      this.images.bg.image = this.draw.bg(this.game);
-      this.images.pig.image = this.draw.pig(this.game);
-      this.images.desk.image = this.draw.desk(this.game);
-
       drawLayersInOrder(
         [
-          [this.images.bg.image],
-          [this.images.pig.image],
-          [this.images.desk.image],
-          this.draw.keyboard(this.game, this.keyboard.currentKey.text)
+          [this.draw.bg(this)],
+          [this.draw.pig(this)],
+          [this.draw.desk(this)],
+          this.draw.explanations(this)
         ],
-        this.game
+        game
       );
 
     },
 
     update: function() {
+
+      if (this.configs.isStageStarted) {
+        this.pig.sit(this);
+        this.keyboard.fall();
+      }
 
       //       if (isStageStarted) {
 
