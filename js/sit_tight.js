@@ -8,7 +8,9 @@ var SitTightGame = function(game) {
       images: [
         "bg.png",
         "pig.png",
-        "desk.png"
+        "desk.png",
+        "key_up.png",
+        "key_down.png"
       ]
     }
   );
@@ -31,230 +33,160 @@ var SitTightGame = function(game) {
   //   "啊啊啊！快站起來了！"
   // ];
 
+  var draw = {
+    asset: {},
+    bg: function() {
+      var imageBg = game.add.image(0, 0, this.asset.getAssetKey("bg.png"));
+      imageBg.scale.set(gameWidth / imageBg.width);
+
+      return imageBg;
+    },
+    pig: function() {
+      var imagePig = game.add.image(gameWidth / 2, gameHeight + 200, this.asset.getAssetKey("pig.png"));
+      imagePig.anchor.set(0.5, 1);
+      imagePig.scale.set((gameHeight - 100) / imagePig.height);
+
+      return imagePig;
+    },
+    desk: function() {
+      var imageDesk = game.add.image(gameWidth / 2, gameHeight, this.asset.getAssetKey("desk.png"));
+      imageDesk.anchor.set(0.5, 1);
+      imageDesk.scale.set((gameHeight - 300) / imageDesk.height);
+
+      return imageDesk;
+    },
+    keyboard: function(x, y, text) {
+      var keyUpImage = game.add.image(x, y, this.asset.getAssetKey("key_up.png"));
+      keyUpImage.anchor.set(0.5);
+      keyUpImage.scale.set(70 / keyUpImage.width);
+
+      var keyText = game.add.text(
+        x,
+        y,
+        text,
+        {
+          font: "40px Arial",
+          fill: "#FFFFFF"
+        }
+      );
+      keyText.anchor.set(0.5);
+
+      var group = game.add.group();
+      group.add(keyUpImage);
+      group.add(keyText);
+
+      return group;
+    }
+  };
+
+  var pig = {
+    body: {},
+    standSpeed: 1,
+    sitSpeed: 2,
+    sit: function() {
+      this.body.y += this.sitSpeed;
+    },
+    stand: function() {
+      this.body.y -= this.standSpeed;
+    }
+  };
+
+  var keyboard = {
+    keys: {
+      "A": Phaser.KeyCode.A,
+      "B": Phaser.KeyCode.B,
+      "C": Phaser.KeyCode.C,
+      "D": Phaser.KeyCode.D,
+      "E": Phaser.KeyCode.E,
+      "F": Phaser.KeyCode.F,
+      "G": Phaser.KeyCode.G,
+      "H": Phaser.KeyCode.H,
+      "I": Phaser.KeyCode.I,
+      "J": Phaser.KeyCode.J,
+      "K": Phaser.KeyCode.K,
+      "L": Phaser.KeyCode.L,
+      "M": Phaser.KeyCode.M,
+      "N": Phaser.KeyCode.N,
+      "O": Phaser.KeyCode.O,
+      "P": Phaser.KeyCode.P,
+      "Q": Phaser.KeyCode.Q,
+      "R": Phaser.KeyCode.R,
+      "S": Phaser.KeyCode.S,
+      "T": Phaser.KeyCode.T,
+      "U": Phaser.KeyCode.U,
+      "V": Phaser.KeyCode.V,
+      "W": Phaser.KeyCode.W,
+      "X": Phaser.KeyCode.X,
+      "Y": Phaser.KeyCode.Y,
+      "Z": Phaser.KeyCode.Z
+    },
+    currentKeys: [],
+    generateRandomKey: function() {
+      var keysKeys = Object.keys(this.keys);
+      var idx = game.rnd.between(0, keysKeys.length - 1);
+      this.currentKeys.push({
+        key: {
+          text: keysKeys[idx],
+          keyCode: this.keys[keysKeys[idx]]
+        },
+        group: draw.keyboard(
+          game.rnd.between(200, gameWidth - 200),
+          -70,
+          keysKeys[idx]
+        ),
+        fallSpeed: game.rnd.between(1, 3)
+      });
+    },
+    updateAll: function() {
+      for (var i = 0; i < this.currentKeys.length; ++i) {
+        this.currentKeys[i].group.y += this.currentKeys[i].fallSpeed;
+      }
+    }
+  };
+
   SitTightGame.prototype = {
 
     preload: function() {
 
       this.asset.loadAll();
 
-      this.keyboard.game = this.game;
-      this.keyboard.keys = this.constant.keys;
-      this.keyboard.status = this.status;
-      this.keyboard.rnd = this.game.rnd;
-      this.keyboard.draw = this.draw;
-
-      this.draw.game = this.game;
-      this.draw.asset = this.asset;
+      draw.asset = this.asset;
 
     },
 
     create: function() {
 
-      this.status.keysLayer = this.game.add.group();
-
       drawLayersInOrder(
         [
-          [this.draw.bg()],
-          [(this.pig.body = this.draw.pig())],
-          [this.draw.desk()],
-          this.status.keysLayer
+          [draw.bg()],
+          [(pig.body = draw.pig())],
+          [draw.desk()]
         ],
-        this.game
+        game
       );
 
       for (var i = 0; i < 5; ++i) {
-        this.keyboard.generateRandomKey();
+        keyboard.generateRandomKey();
       }
-
-      this.keyboard.updateAll();
 
     },
 
     update: function() {
 
-      this.keyboard.updateAll();
-
-      if (this.pig.body.y >= gameHeight) {
-        this.pig.stand();
+      if (pig.body.y >= gameHeight) {
+        pig.stand();
       } else {
         //lose
       }
 
-    },
+      keyboard.updateAll();
 
-    constant: {
-
-      keys: {
-        "A": Phaser.KeyCode.A,
-        "B": Phaser.KeyCode.B,
-        "C": Phaser.KeyCode.C,
-        "D": Phaser.KeyCode.D,
-        "E": Phaser.KeyCode.E,
-        "F": Phaser.KeyCode.F,
-        "G": Phaser.KeyCode.G,
-        "H": Phaser.KeyCode.H,
-        "I": Phaser.KeyCode.I,
-        "J": Phaser.KeyCode.J,
-        "K": Phaser.KeyCode.K,
-        "L": Phaser.KeyCode.L,
-        "M": Phaser.KeyCode.M,
-        "N": Phaser.KeyCode.N,
-        "O": Phaser.KeyCode.O,
-        "P": Phaser.KeyCode.P,
-        "Q": Phaser.KeyCode.Q,
-        "R": Phaser.KeyCode.R,
-        "S": Phaser.KeyCode.S,
-        "T": Phaser.KeyCode.T,
-        "U": Phaser.KeyCode.U,
-        "V": Phaser.KeyCode.V,
-        "W": Phaser.KeyCode.W,
-        "X": Phaser.KeyCode.X,
-        "Y": Phaser.KeyCode.Y,
-        "Z": Phaser.KeyCode.Z
-      }
-
-    },
-
-    status: {
-
-      isStageStarted: false,
-
-      level: 1,
-
-      keysLayer: {},
-
-      currentKeys: []
-
-    },
-
-    pig: {
-
-      body: {},
-
-      standSpeed: 1,
-
-      sitSpeed: 2,
-
-      sit: function() {
-        this.body.y += this.sitSpeed;
-      },
-
-      stand: function() {
-        this.body.y -= this.standSpeed;
-      }
-
-    },
-
-    keyboard: {
-
-      game: {},
-
-      keys: {},
-
-      status: {},
-
-      rnd: {},
-
-      draw: {},
-
-      generateRandomKey: function() {
-        var keysKeys = Object.keys(this.keys);
-        var idx = this.rnd.between(0, keysKeys.length - 1);
-        this.status.currentKeys.push(
-          {
-            key: {
-              text: keysKeys[idx],
-              keyCode: this.keys[keysKeys[idx]]
-            },
-            x: this.rnd.between(100, gameWidth - 200),
-            y: -70,
-            fallSpeed: this.rnd.between(1, 5)
-          }
-        );
-      },
-
-      updateAll: function() {
-        this.status.keysLayer.destroy(true);
-
-        var keysLayer = this.game.add.group();
-        var currentKeys = this.status.currentKeys;
-
-        for (var i = 0; i < currentKeys.length; ++i) {
-          keysLayer.add(
-            this.draw.keyboard(
-              currentKeys[i].key.text,
-              currentKeys[i].x,
-              (currentKeys[i].y += currentKeys[i].fallSpeed)
-            )
-          );
+      for (var i = 0; i < keyboard.currentKeys.length; ++i) {
+        if (game.input.keyboard.isDown(keyboard.currentKeys[i].key.keyCode)) {
+          keyboard.currentKeys[i].group.destroy();
+          keyboard.currentKeys.splice(i, 1);
+          break;
         }
-        this.status.keysLayer = keysLayer;
-      }
-
-    },
-
-    draw: {
-
-      game: {},
-
-      asset: {},
-
-      bg: function() {
-        var imageBg = this.game.add.image(0, 0, this.asset.getAssetKey("bg.png"));
-        imageBg.scale.set(gameWidth / imageBg.width);
-
-        return imageBg;
-      },
-
-      pig: function() {
-        var imagePig = this.game.add.image(gameWidth / 2, gameHeight + 200, this.asset.getAssetKey("pig.png"));
-        imagePig.anchor.set(0.5, 1);
-        imagePig.scale.set((gameHeight - 100) / imagePig.height);
-
-        return imagePig;
-      },
-
-      desk: function() {
-        var imageDesk = this.game.add.image(gameWidth / 2, gameHeight, this.asset.getAssetKey("desk.png"));
-        imageDesk.anchor.set(0.5, 1);
-        imageDesk.scale.set((gameHeight - 300) / imageDesk.height);
-
-        return imageDesk;
-      },
-
-      keyboard: function(text, x, y) {
-        var width = 70;
-        var height = width;
-        if (y === undefined) {
-          y = -1 * height;
-        }
-
-        var graphics = this.game.add.graphics();
-        graphics.beginFill(0x333333);
-        graphics.drawRoundedRect(
-          x,
-          y,
-          width,
-          height,
-          10
-        );
-
-        var keyText = this.game.add.text(
-          x + width / 2,
-          y + height / 2,
-          text,
-          {
-            font: "40px Arial",
-            fill: "#FFFFFF"
-          }
-        );
-        keyText.anchor.set(0.5);
-
-        var group = this.game.add.group();
-        group.add(graphics);
-        group.add(keyText);
-
-        return group;
       }
 
     }
