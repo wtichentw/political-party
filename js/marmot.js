@@ -1,10 +1,11 @@
 var Marmot = function (game) {};
 
 (function () {
-  var GAME_TIME = 5000;
-  var MONSTER_SPAWN_TIME = 3000;
+  var GAME_TIME = 60000;
+  var MONSTER_SPAWN_TIME = 1500;
   var MARMOT_DISAPPEAR_TIME = 2000;
   var bg, score, scoreText, timeText, gameTimer;
+  var toolsLayer;
   var monsterTypes = ['marmot', 'leaf', 'son'];
   var monsterEmptyPos = [];
   var monsterPositions = [
@@ -39,6 +40,7 @@ var Marmot = function (game) {};
     var monster = game.add.image(monsterPositions[pos].x, monsterPositions[pos].y, type);
     monster.scale.setTo(0.5);
     monster.alpha = 0.1;
+    monster.z = 1;
     monster.inputEnabled = true;
     monster.events.onInputDown.add(hitMonster, this);
     monster.monsterType = type;
@@ -48,6 +50,8 @@ var Marmot = function (game) {};
 
     if (type == 'marmot')
       game.time.events.add(MARMOT_DISAPPEAR_TIME, function(){monster.destroy();}, this);
+
+    game.world.bringToTop(toolsLayer);
   }
 
   function hitMonster (monster) {
@@ -83,9 +87,12 @@ var Marmot = function (game) {};
       console.log('failure');
     }
     monsterEmptyPos.push(monster.monsterPos);
+    game.world.bringToTop(toolsLayer);
+    
   }
 
   function pickRandomElement (array) {
+    if (array.length == 0) loseGame();
     return array[Math.floor(Math.random()*array.length)];
   }
 
@@ -129,14 +136,17 @@ var Marmot = function (game) {};
       timeText  =  game.add.text(50, 150, 60, {font: '28px Arial', fill: '#000000'});
 
       // ----- Tools
+      toolsLayer = game.add.group();
       playerTools.waterpot = game.add.image(0, 0, 'waterpot');
       playerTools.waterpot.scale.setTo(0.5);
       playerTools.waterpot.visible = false;
       playerTools.waterpot.anchor.set(0.5, 0.5);
+      toolsLayer.add(playerTools.waterpot);
       playerTools.dirt = game.add.image(0, 0, 'dirt');
       playerTools.dirt.scale.setTo(0.5);
       playerTools.dirt.visible = false;
       playerTools.dirt.anchor.set(0.5, 0.5);
+      toolsLayer.add(playerTools.dirt);
 
       // ----- Init
       score = 0;
