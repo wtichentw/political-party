@@ -16,7 +16,7 @@ var MainMenu = function(game) {};
       game.load.image("mainMenuShi", "media/main_menu/shi.png");
       game.load.image("mainMenuRose", "media/main_menu/rose.png");
       game.load.image("mainMenuRealPig", "media/main_menu/realpig.png");
-
+      game.load.image("mainMenuSon", "media/main_menu/son.png");
     },
     create: function() {
       game.add.image(0, 0, "mainMenuBg");
@@ -39,7 +39,10 @@ var MainMenu = function(game) {};
       imageRealPig = game.add.image(40, 550, "mainMenuRealPig");
       imageRealPig.scale.set(0.31);
 
-      var images = [imagePig, imageHorse, imageEng, imageShi, imageRose, imageRealPig];
+      imageSon = game.add.image(425, 445, "mainMenuSon");
+      imageSon.scale.set(0.31);
+
+      var images = [imagePig, imageHorse, imageEng, imageShi, imageRose, imageRealPig, imageSon];
       for (var i = 0; i < images.length; ++i) {
         images[i].inputEnabled = true;
         images[i].events.onInputOver.add(function() {
@@ -48,7 +51,7 @@ var MainMenu = function(game) {};
         images[i].events.onInputOut.add(function() {
           this.y += 20;
         }, images[i]);
-
+        // ----- ADD EVENT
         images[0].events.onInputDown.add(function() {
           this.game.state.start(
             "StageIntro",
@@ -107,6 +110,22 @@ var MainMenu = function(game) {};
             }
           );
         }, images[5]);
+
+        images[6].events.onInputDown.add(function() {
+          this.game.state.start(
+            'StageIntro',
+            true,
+            false,
+            {
+              titleText: '第三話｜宋神掌',
+              subtitleText: 'Happy Farm',
+              nextState: {
+                key: 'Marmot'
+              }
+            }
+          );
+        }, images[6]);
+        // ----- END
       }
     },
   };
