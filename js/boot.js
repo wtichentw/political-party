@@ -15,6 +15,6 @@ Boot.prototype = {
     game.scale.pageAlignHorizontally = true;
     game.scale.pageAlignVertically = true;
 
-    game.state.start("FlappyPig");
+    game.state.start("Yoda");
   }
 };
