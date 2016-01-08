@@ -10,7 +10,10 @@ var SitTightGame = function(game) {
         "pig.png",
         "desk.png",
         "key_up.png",
-        "key_down.png"
+        "key_down.png",
+        "explanation1.jpg",
+        "explanation2.jpg",
+        "explanation3.jpg"
       ]
     }
   );
@@ -33,27 +36,119 @@ var SitTightGame = function(game) {
   //   "啊啊啊！快站起來了！"
   // ];
 
+  var state = {
+    states: [
+      {
+        name: "Explanation",
+        isStarted: false
+      },
+      {
+        name: "CountDown",
+        isStarted: false
+      },
+      {
+        name: "Game",
+        isStarted: false
+      },
+      {
+        name: "GameOver",
+        isStarted: false
+      }
+    ],
+    currentStateIdx: 0,
+    getCurrentState: function() {
+      return this.states[this.currentStateIdx];
+    },
+    nextState: function() {
+      ++this.currentStateIdx;
+    }
+  };
+
   var draw = {
     asset: {},
     bg: function() {
-      var imageBg = game.add.image(0, 0, this.asset.getAssetKey("bg.png"));
-      imageBg.scale.set(gameWidth / imageBg.width);
+      var bgImage = game.add.image(0, 0, this.asset.getAssetKey("bg.png"));
+      bgImage.scale.set(gameWidth / bgImage.width);
 
-      return imageBg;
+      return bgImage;
     },
     pig: function() {
-      var imagePig = game.add.image(gameWidth / 2, gameHeight + 200, this.asset.getAssetKey("pig.png"));
-      imagePig.anchor.set(0.5, 1);
-      imagePig.scale.set((gameHeight - 100) / imagePig.height);
+      var pigImage = game.add.image(gameWidth / 2, gameHeight + 200, this.asset.getAssetKey("pig.png"));
+      pigImage.anchor.set(0.5, 1);
+      pigImage.scale.set((gameHeight - 100) / pigImage.height);
 
-      return imagePig;
+      return pigImage;
     },
     desk: function() {
-      var imageDesk = game.add.image(gameWidth / 2, gameHeight, this.asset.getAssetKey("desk.png"));
-      imageDesk.anchor.set(0.5, 1);
-      imageDesk.scale.set((gameHeight - 300) / imageDesk.height);
+      var deskImage = game.add.image(gameWidth / 2, gameHeight, this.asset.getAssetKey("desk.png"));
+      deskImage.anchor.set(0.5, 1);
+      deskImage.scale.set((gameHeight - 300) / deskImage.height);
 
-      return imageDesk;
+      return deskImage;
+    },
+    explanations: function() {
+      var explanationLayer = game.add.group();
+      for (var i = 3; i >= 1; --i) {
+        var explanationImage = game.add.image(0, 0, this.asset.getAssetKey("explanation" + i + ".jpg"));
+        explanationImage.scale.set(gameWidth / explanationImage.width);
+        explanationImage.inputEnabled = true;
+        if (i === 3) {
+          explanationImage.events.onInputDown.add(
+            function() {
+              this.destroy();
+              state.nextState();
+            },
+            explanationImage
+          );
+        } else {
+          explanationImage.events.onInputDown.add(
+            function() {
+              this.destroy();
+            },
+            explanationImage
+          );
+        }
+        explanationLayer.add(explanationImage);
+      }
+      return explanationLayer;
+    },
+    countDown: function() {
+      var texts = ["3", "2", "1", "GO!"];
+      for (var i = 0; i < 4; ++i) {
+        game.time.events.add(
+          i * 1000,
+          function(text) {
+            var countDownText = game.add.text(
+              gameWidth / 2,
+              gameHeight / 2,
+              text,
+              {
+                font: "100px Arial",
+                fill: "#FF0000"
+              }
+            );
+            countDownText.anchor.set(0.5);
+            var countDownTextTween = game.add.tween(countDownText).to(
+              {
+                alpha: 0
+              },
+              1000,
+              "Linear",
+              true
+            );
+            if (text === "GO!") {
+              countDownTextTween.onComplete.add(
+                function() {
+                  state.nextState();
+                },
+                game
+              );
+            }
+          },
+          game,
+          texts[i]
+        );
+      }
     },
     keyboard: function(x, y, text) {
       var keyUpImage = game.add.image(x, y, this.asset.getAssetKey("key_up.png"));
@@ -81,8 +176,8 @@ var SitTightGame = function(game) {
 
   var pig = {
     body: {},
-    standSpeed: 1,
-    sitSpeed: 2,
+    standSpeed: 0.1,
+    sitSpeed: 10,
     sit: function() {
       this.body.y += this.sitSpeed;
     },
@@ -160,7 +255,8 @@ var SitTightGame = function(game) {
         [
           [draw.bg()],
           [(pig.body = draw.pig())],
-          [draw.desk()]
+          [draw.desk()],
+          draw.explanations()
         ],
         game
       );
@@ -169,32 +265,54 @@ var SitTightGame = function(game) {
         keyboard.generateRandomKey();
       }
 
-      game.time.events.loop(
-        1000,
-        function() {
-          keyboard.generateRandomKey();
-        },
-        game
-      );
-
     },
 
     update: function() {
 
-      if (pig.body.y >= gameHeight) {
-        pig.stand();
-      } else {
-        //lose
-      }
+      var currentState = state.getCurrentState();
+      switch (currentState.name) {
 
-      keyboard.updateAll();
-
-      for (var i = 0; i < keyboard.currentKeys.length; ++i) {
-        if (game.input.keyboard.isDown(keyboard.currentKeys[i].key.keyCode)) {
-          keyboard.currentKeys[i].group.destroy();
-          keyboard.currentKeys.splice(i, 1);
+        case "Explantion":
           break;
-        }
+
+        case "CountDown":
+          if (!currentState.isStarted) {
+            currentState.isStarted = true;
+            draw.countDown();
+          }
+          break;
+
+        case "Game":
+
+          if (!currentState.isStarted) {
+            currentState.isStarted = true;
+            game.time.events.loop(
+              1000,
+              function() {
+                keyboard.generateRandomKey();
+              },
+              game
+            );
+          }
+
+          if (pig.body.y >= gameHeight) {
+            pig.stand();
+          } else {
+            //lose
+          }
+
+          keyboard.updateAll();
+
+          for (var i = 0; i < keyboard.currentKeys.length; ++i) {
+            if (game.input.keyboard.isDown(keyboard.currentKeys[i].key.keyCode)) {
+              pig.sit();
+              keyboard.currentKeys[i].group.destroy();
+              keyboard.currentKeys.splice(i, 1);
+              break;
+            }
+          }
+
+          break;
       }
 
     }
