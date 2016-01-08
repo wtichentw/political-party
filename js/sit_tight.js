@@ -169,6 +169,14 @@ var SitTightGame = function(game) {
         keyboard.generateRandomKey();
       }
 
+      game.time.events.loop(
+        1000,
+        function() {
+          keyboard.generateRandomKey();
+        },
+        game
+      );
+
     },
 
     update: function() {
