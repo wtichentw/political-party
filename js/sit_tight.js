@@ -306,7 +306,21 @@ var SitTightGame = function(game) {
           for (var i = 0; i < keyboard.currentKeys.length; ++i) {
             if (game.input.keyboard.isDown(keyboard.currentKeys[i].key.keyCode)) {
               pig.sit();
-              keyboard.currentKeys[i].group.destroy();
+              keyboard.currentKeys[i].fallSpeed = 0;
+              var keyboardTween = game.add.tween(keyboard.currentKeys[i].group).to(
+                {
+                  alpha: 0
+                },
+                500,
+                "Linear",
+                true
+              );
+              keyboardTween.onComplete.add(
+                function() {
+                  this.destroy();
+                },
+                keyboard.currentKeys[i].group
+              );
               keyboard.currentKeys.splice(i, 1);
               break;
             }
