@@ -405,6 +405,13 @@ var SitTightGame = function(game) {
           );
 
           break;
+
+        case "GameOver":
+          if (!currentState.isStarted) {
+            game.time.events.stop();
+          }
+
+          break;
       }
 
     }
