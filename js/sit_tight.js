@@ -10,10 +10,10 @@ var SitTightGame = function(game) {
         "pig.png",
         "desk.png",
         "key_up.png",
-        "key_down.png",
         "explanation1.jpg",
         "explanation2.jpg",
-        "explanation3.jpg"
+        "explanation3.jpg",
+        "explosion.png"
       ]
     }
   );
@@ -174,6 +174,12 @@ var SitTightGame = function(game) {
     },
     keyboards: function() {
       return game.add.group();
+    },
+    explosion: function(x) {
+      var explosionImage = game.add.image(x, gameHeight, this.asset.getAssetKey("explosion.png"));
+      explosionImage.anchor.set(0.5);
+
+      return explosionImage;
     }
   };
 
@@ -312,7 +318,25 @@ var SitTightGame = function(game) {
 
           keyboard.layer.forEachAlive(
             function(child) {
-              if (game.input.keyboard.isDown(keyboard.keys[child.getChildAt(1).text])) {
+              var childImage = child.getChildAt(0);
+              var childText = child.getChildAt(1);
+              if (childImage.y + 35 >= gameHeight) {
+                var explosionImage = draw.explosion(childImage.x);
+                game.add.tween(explosionImage).to(
+                  {
+                    alpha: 0
+                  },
+                  500,
+                  "Linear",
+                  true
+                );
+                pig.stand();
+                child.fallSpeed = 0;
+                child.alive = false;
+                this.removeChild(child);
+                return;
+              }
+              if (game.input.keyboard.isDown(keyboard.keys[childText.text])) {
                 pig.sit();
                 child.fallSpeed = 0;
                 child.alive = false;
@@ -332,7 +356,7 @@ var SitTightGame = function(game) {
                 );
               }
             },
-            this
+            keyboard.layer
           );
 
           break;
