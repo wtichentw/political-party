@@ -14,7 +14,11 @@ var SitTightGame = function(game) {
         "explanation2.jpg",
         "explanation3.jpg",
         "explosion.png",
-        "dialog.png"
+        "dialog.png",
+        "grandma.png"
+      ],
+      videos: [
+        "grandma.webm"
       ]
     }
   );
@@ -23,6 +27,8 @@ var SitTightGame = function(game) {
 
 (function() {
   "use strict";
+
+  var isPaused = false;
 
   var constant = {
     murmurTexts: [
@@ -217,6 +223,44 @@ var SitTightGame = function(game) {
       );
 
       return murmurGroup;
+    },
+    warning: function() {
+      var warningText = game.add.text(
+        gameWidth / 2,
+        gameHeight / 2,
+        "WARNING",
+        {
+          font: "150px Arial",
+          fill: "#FF0000"
+        }
+      );
+      warningText.anchor.set(0.5);
+
+      return warningText;
+    },
+    grandma: function() {
+      var grandmaImage = game.add.image(0, gameHeight, this.asset.getAssetKey("grandma.png"));
+      grandmaImage.anchor.set(0, 1);
+      grandmaImage.x = -1 * grandmaImage.width;
+      grandmaImage.scale.set(0.5);
+
+      return grandmaImage;
+    },
+    grandmaVideo: function() {
+      var graphics = game.add.graphics();
+      graphics.beginFill(0x000000, 0.5);
+      graphics.drawRect(0, 0, gameWidth, gameHeight);
+      graphics.endFill();
+
+      var grandmaVideo = game.add.video(this.asset.getAssetKey("grandma.webm"));
+
+      var grandmaVideoLayer = game.add.group();
+      grandmaVideoLayer.add(graphics);
+      var videoSprite = grandmaVideoLayer.create(gameWidth / 2, gameHeight / 2, grandmaVideo);
+      videoSprite.anchor.set(0.5);
+      videoSprite.scale.set(gameHeight / grandmaVideo.height);
+
+      return grandmaVideoLayer;
     }
   };
 
@@ -227,8 +271,9 @@ var SitTightGame = function(game) {
     sit: function() {
       this.body.y += this.sitSpeed;
     },
-    stand: function() {
-      this.body.y -= this.standSpeed;
+    stand: function(speed) {
+      var standSpeed = speed || this.standSpeed;
+      this.body.y -= standSpeed;
     }
   };
 
@@ -262,6 +307,7 @@ var SitTightGame = function(game) {
       "Z": Phaser.KeyCode.Z
     },
     layer: {},
+    timer: {},
     generateRandomKey: function() {
       var keysKeys = Object.keys(this.keys);
       var idx = game.rnd.between(0, keysKeys.length - 1);
@@ -319,99 +365,154 @@ var SitTightGame = function(game) {
 
     update: function() {
 
-      var currentState = state.getCurrentState();
-      switch (currentState.name) {
+      if (!isPaused) {
 
-        case "Explantion":
-          break;
+        var currentState = state.getCurrentState();
+        switch (currentState.name) {
 
-        case "CountDown":
-          if (!currentState.isStarted) {
-            currentState.isStarted = true;
-            draw.countDown();
-          }
-          break;
+          case "Explantion":
+            break;
 
-        case "Game":
+          case "CountDown":
+            if (!currentState.isStarted) {
+              currentState.isStarted = true;
+              draw.countDown();
+            }
+            break;
 
-          if (!currentState.isStarted) {
-            currentState.isStarted = true;
-            game.time.events.loop(
-              1000,
-              function() {
-                keyboard.generateRandomKey();
+          case "Game":
+
+            if (!currentState.isStarted) {
+              currentState.isStarted = true;
+              keyboard.timer = game.time.events.loop(
+                1000,
+                function() {
+                  keyboard.generateRandomKey();
+                },
+                game
+              );
+              game.time.events.loop(
+                5000,
+                function() {
+                  var murmurTexts = constant.murmurTexts;
+                  draw.murmur(murmurTexts[game.rnd.between(0, murmurTexts.length - 1)]);
+                },
+                game
+              );
+              game.time.events.add(
+                5000,
+                function() {
+                  var warningText = draw.warning();
+                  warningText.alpha = 0;
+                  var warningTextTween = game.add.tween(warningText).to(
+                    {
+                      alpha: 1
+                    },
+                    500,
+                    "Linear",
+                    true,
+                    0,
+                    3,
+                    true
+                  );
+                  warningTextTween.onComplete.add(
+                    function() {
+                      var grandmaImage = draw.grandma();
+                      var grandmaImageTween = game.add.tween(grandmaImage).to(
+                        {
+                          x: gameWidth
+                        },
+                        5000,
+                        "Linear",
+                        true
+                      );
+                      grandmaImageTween.onComplete.add(
+                        function() {
+                          game.time.events.pause();
+                          isPaused = true;
+                          var grandmaVideoLayer = draw.grandmaVideo();
+                          var grandmaVideo = grandmaVideoLayer.getChildAt(1).key;
+                          grandmaVideo.play();
+                          grandmaVideo.onComplete.add(
+                            function() {
+                              this.destroy();
+                              isPaused = false;
+                              game.time.events.resume();
+                            },
+                            grandmaVideoLayer
+                          );
+                        },
+                        this
+                      );
+                    },
+                    this
+                  );
+                },
+                this
+              );
+            }
+
+            if (pig.body.y >= gameHeight) {
+              pig.stand();
+            } else {
+              state.nextState();
+            }
+
+            keyboard.updateAll();
+
+            keyboard.layer.forEachAlive(
+              function(child) {
+                var childImage = child.getChildAt(0);
+                var childText = child.getChildAt(1);
+                if (childImage.y + 35 >= gameHeight) {
+                  pig.stand(5);
+                  var explosionImage = draw.explosion(childImage.x);
+                  game.add.tween(explosionImage).to(
+                    {
+                      alpha: 0
+                    },
+                    500,
+                    "Linear",
+                    true
+                  );
+                  child.fallSpeed = 0;
+                  child.alive = false;
+                  this.removeChild(child);
+                  return;
+                }
+                if (game.input.keyboard.isDown(keyboard.keys[childText.text])) {
+                  pig.sit();
+                  child.fallSpeed = 0;
+                  child.alive = false;
+                  var childTween = game.add.tween(child).to(
+                    {
+                      alpha: 0
+                    },
+                    500,
+                    "Linear",
+                    true
+                  );
+                  childTween.onComplete.add(
+                    function() {
+                      this.destroy();
+                    },
+                    child
+                  );
+                }
               },
-              game
+              keyboard.layer
             );
-            game.time.events.loop(
-              5000,
-              function() {
-                var murmurTexts = constant.murmurTexts;
-                draw.murmur(murmurTexts[game.rnd.between(0, murmurTexts.length - 1)]);
-              },
-              game
-            );
-          }
 
-          if (pig.body.y >= gameHeight) {
-            pig.stand();
-          } else {
-            state.nextState();
-          }
+            break;
 
-          keyboard.updateAll();
+          case "GameOver":
+            if (!currentState.isStarted) {
+              game.time.events.stop();
+            }
 
-          keyboard.layer.forEachAlive(
-            function(child) {
-              var childImage = child.getChildAt(0);
-              var childText = child.getChildAt(1);
-              if (childImage.y + 35 >= gameHeight) {
-                var explosionImage = draw.explosion(childImage.x);
-                game.add.tween(explosionImage).to(
-                  {
-                    alpha: 0
-                  },
-                  500,
-                  "Linear",
-                  true
-                );
-                pig.stand();
-                child.fallSpeed = 0;
-                child.alive = false;
-                this.removeChild(child);
-                return;
-              }
-              if (game.input.keyboard.isDown(keyboard.keys[childText.text])) {
-                pig.sit();
-                child.fallSpeed = 0;
-                child.alive = false;
-                var childTween = game.add.tween(child).to(
-                  {
-                    alpha: 0
-                  },
-                  500,
-                  "Linear",
-                  true
-                );
-                childTween.onComplete.add(
-                  function() {
-                    this.destroy();
-                  },
-                  child
-                );
-              }
-            },
-            keyboard.layer
-          );
+            break;
+        }
 
-          break;
-
-        case "GameOver":
-          if (!currentState.isStarted) {
-            game.time.events.stop();
-          }
-
-          break;
       }
 
     }
