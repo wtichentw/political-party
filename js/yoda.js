@@ -2,6 +2,16 @@ var Yoda = function (game) {};
 
 (function () {
 
+  var monsters = [];
+  var monsterType = ['ufo', 'et', 'meteor'];
+  var monsterDir = [
+    { x: 1, y: 0, from:    0, to: 1280, anchor:[1.0, 0.0], dir: 'x'},
+    { x:-1, y: 0, from: 1280, to:    0, anchor:[0.0, 0.0], dir: 'x'},
+    { x: 0, y: 1, from:    0, to:  720, anchor:[0.0, 1.0], dir: 'y'},
+    { x: 0, y:-1, from:  720, to:    0, anchor:[0.0, 0.0], dir: 'y'}
+  ]
+
+
   var tsai;
   var moveEvent;
   var brush;
@@ -68,6 +78,44 @@ var Yoda = function (game) {};
     return spr;
   }
 
+  // ----- START
+  function createMonster () {
+    console.log('create monster');
+    var type = pickRandomElement(monsterType);
+    var dir  = pickRandomElement(monsterDir);
+    var monster;
+
+    if (dir.dir === 'x') {
+      monster = game.add.image(dir.from, game.rnd.integerInRange(0, 720), type);
+      game.add.tween(monster).to( { x: dir.to }, 3000, "Linear", true);
+    } else {
+      monster = game.add.image(game.rnd.integerInRange(0, 1280), dir.from, type);
+      game.add.tween(monster).to( { y: dir.to }, 3000, "Linear", true);
+    }
+    game.time.events.add(3000, function() {monsters.splice(monsters.indexOf(monster, 1)); monster.destroy(); }, this);
+    monster.anchor.setTo(dir.anchor[0], dir.anchor[1]);
+    monsters.push(monster);
+  }
+
+  function pickRandomElement (array) {
+    var element = array[Math.floor(Math.random()*array.length)]
+    return element === undefined ? 0: element;
+  }
+
+  function checkMonsterCollision () {
+    for (var i = 0; i < monsters.length; i++) {
+
+      var boundsA = monsters[i].getBounds();
+      var boundsB = tsai.character.spr.getBounds();
+
+      if (boundsA !== undefined && boundsB !== undefined) {
+        if (Phaser.Rectangle.intersects(boundsA, boundsB))
+          console.log('aa');
+      }
+    }
+  }
+  // ----- END
+
   Yoda.prototype = {
     preload: function() {
       game = this.game;
@@ -80,6 +128,12 @@ var Yoda = function (game) {};
       game.load.spritesheet('tsai', 'media/yoda/tsai.png', 150, 157, 2);
       game.load.spritesheet('yoda', 'media/yoda/yoda.png', 150, 157, 2);
       game.load.audio('bgm', ['media/yoda/yoda_bgm.wav']);
+
+      // ----- Monster
+      game.load.image('ufo', 'media/yoda/ufo.png');
+      game.load.image('et', 'media/yoda/et.png');
+      game.load.image('meteor', 'media/yoda/meteor.png');
+
     },
     create: function() {
       game.add.sprite(0, 0, 'planet_bg');
@@ -114,9 +168,13 @@ var Yoda = function (game) {};
       var keyRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
       keyRight.onDown.add(()=>{tsai.moveRight();}, this);
       keyRight.onUp.add(()=>{tsai.stop();}, this);
+
+      // ----- create
+      game.time.events.loop(3000, createMonster, this);
     },
     update: function() {
       tsai.update();
+      checkMonsterCollision();
     },
     render: function() {
     }
