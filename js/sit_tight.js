@@ -28,8 +28,6 @@ var SitTightGame = function(game) {
 (function() {
   "use strict";
 
-  var isPaused = false;
-
   var constant = {
     murmurTexts: [
       "都快坐到桌子下面了啦",
@@ -46,6 +44,7 @@ var SitTightGame = function(game) {
   };
 
   var state = {
+    isPaused: false,
     states: [
       {
         name: "Explanation",
@@ -175,11 +174,11 @@ var SitTightGame = function(game) {
       );
       keyText.anchor.set(0.5);
 
-      var group = game.add.group();
-      group.add(keyUpImage);
-      group.add(keyText);
+      var keyboardGroup = game.add.group();
+      keyboardGroup.add(keyUpImage);
+      keyboardGroup.add(keyText);
 
-      return group;
+      return keyboardGroup;
     },
     keyboards: function() {
       return game.add.group();
@@ -264,6 +263,8 @@ var SitTightGame = function(game) {
     }
   };
 
+  var layers = {};
+
   var pig = {
     body: {},
     standSpeed: 0.1,
@@ -306,7 +307,6 @@ var SitTightGame = function(game) {
       "Y": Phaser.KeyCode.Y,
       "Z": Phaser.KeyCode.Z
     },
-    layer: {},
     timer: {},
     generateRandomKey: function() {
       var keysKeys = Object.keys(this.keys);
@@ -317,10 +317,10 @@ var SitTightGame = function(game) {
         keysKeys[idx]
       );
       group.fallSpeed = game.rnd.between(1, 5);
-      this.layer.add(group);
+      layers.keyboards.add(group);
     },
     updateAll: function() {
-      this.layer.forEach(
+      layers.keyboards.forEach(
         function(keyboard) {
           keyboard.forEach(
             function(child) {
@@ -346,16 +346,18 @@ var SitTightGame = function(game) {
 
     create: function() {
 
-      drawLayersInOrder(
-        [
-          [draw.bg()],
-          [(pig.body = draw.pig())],
-          [draw.desk()],
-          [(keyboard.layer = draw.keyboards())],
-          draw.explanations()
-        ],
+      layers = drawLayersInOrder(
+        {
+          bg: [draw.bg()],
+          pig: [draw.pig()],
+          desk: [draw.desk()],
+          keyboards: draw.keyboards(),
+          explanations: draw.explanations()
+        },
         game
       );
+
+      pig.body = layers.pig.getChildAt(0);
 
       for (var i = 0; i < 5; ++i) {
         keyboard.generateRandomKey();
@@ -365,7 +367,7 @@ var SitTightGame = function(game) {
 
     update: function() {
 
-      if (!isPaused) {
+      if (!state.isPaused) {
 
         var currentState = state.getCurrentState();
         switch (currentState.name) {
@@ -429,14 +431,14 @@ var SitTightGame = function(game) {
                       grandmaImageTween.onComplete.add(
                         function() {
                           game.time.events.pause();
-                          isPaused = true;
+                          state.isPaused = true;
                           var grandmaVideoLayer = draw.grandmaVideo();
                           var grandmaVideo = grandmaVideoLayer.getChildAt(1).key;
                           grandmaVideo.play();
                           grandmaVideo.onComplete.add(
                             function() {
                               this.destroy();
-                              isPaused = false;
+                              state.isPaused = false;
                               game.time.events.resume();
                             },
                             grandmaVideoLayer
@@ -460,7 +462,7 @@ var SitTightGame = function(game) {
 
             keyboard.updateAll();
 
-            keyboard.layer.forEachAlive(
+            layers.keyboards.forEachAlive(
               function(child) {
                 var childImage = child.getChildAt(0);
                 var childText = child.getChildAt(1);
@@ -500,7 +502,7 @@ var SitTightGame = function(game) {
                   );
                 }
               },
-              keyboard.layer
+              layers.keyboards
             );
 
             break;
