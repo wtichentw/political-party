@@ -120,7 +120,13 @@ var MainMenu = function(game) {};
               titleText: '第三話｜宋神掌',
               subtitleText: 'Happy Farm',
               nextState: {
-                key: 'Marmot'
+                key: 'IntroVideo',
+                args: {
+                  videoPath: "media/marmot/intro.webm",
+                  nextState: {
+                    key: "Marmot"
+                  }
+                }
               }
             }
           );
