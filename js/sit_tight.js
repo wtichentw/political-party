@@ -15,7 +15,8 @@ var SitTightGame = function(game) {
         "explanation3.jpg",
         "explosion.png",
         "dialog.png",
-        "grandma.png"
+        "grandma.png",
+        "light.png"
       ],
       videos: [
         "grandma.webm"
@@ -260,6 +261,13 @@ var SitTightGame = function(game) {
       videoSprite.scale.set(gameHeight / grandmaVideo.height);
 
       return grandmaVideoLayer;
+    },
+    light: function(x, y) {
+      var lightImage = game.add.image(x, y, this.asset.getAssetKey("light.png"));
+      lightImage.anchor.set(0.5);
+      lightImage.scale.set(0.5);
+
+      return lightImage;
     }
   };
 
@@ -438,8 +446,40 @@ var SitTightGame = function(game) {
                           grandmaVideo.onComplete.add(
                             function() {
                               this.destroy();
-                              state.isPaused = false;
-                              game.time.events.resume();
+                              var lightImage = draw.light(
+                                pig.body.x,
+                                pig.body.y - pig.body.height + 10
+                              );
+                              lightImage.alpha = 0;
+                              layers.pig.add(lightImage);
+                              var lightImageTween = game.add.tween(lightImage).to(
+                                {
+                                  x: pig.body.x + 50,
+                                  y: pig.body.y - pig.body.height + 50,
+                                  alpha: 1
+                                },
+                                2000,
+                                "Linear",
+                                true
+                              );
+                              game.add.tween(lightImage.scale).to(
+                                {
+                                  x: 1,
+                                  y: 1
+                                },
+                                2000,
+                                "Linear",
+                                true
+                              );
+                              lightImageTween.onComplete.add(
+                                function() {
+                                  this.destroy();
+                                  pig.stand(50);
+                                  state.isPaused = false;
+                                  game.time.events.resume();
+                                },
+                                lightImage
+                              );
                             },
                             grandmaVideoLayer
                           );
