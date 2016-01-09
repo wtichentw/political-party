@@ -13,7 +13,8 @@ var SitTightGame = function(game) {
         "explanation1.jpg",
         "explanation2.jpg",
         "explanation3.jpg",
-        "explosion.png"
+        "explosion.png",
+        "dialog.png"
       ]
     }
   );
@@ -23,18 +24,20 @@ var SitTightGame = function(game) {
 (function() {
   "use strict";
 
-  // var blahTexts = [
-  //   "都快坐到桌子下面了啦",
-  //   "屁股坐的好酸喔",
-  //   "我說過會坐好坐滿嘛",
-  //   "好想站起來休息一下",
-  //   "啊唷！真拿你沒辦法",
-  //   "這麼雷的遊戲你也敢玩？",
-  //   "有必要這樣逼人家坐著嗎？",
-  //   "我要使出全力站起來囉",
-  //   "淡水阿嬤在找我啦！",
-  //   "啊啊啊！快站起來了！"
-  // ];
+  var constant = {
+    murmurTexts: [
+      "都快坐到桌子下面了啦",
+      "屁股坐的好酸喔",
+      "我說過會坐好坐滿嘛",
+      "好想站起來休息一下",
+      "啊唷！真拿你沒辦法",
+      "這麼雷的遊戲你也敢玩？",
+      "有必要這樣逼人家坐著嗎？",
+      "我要使出全力站起來囉",
+      "淡水阿嬤在找我啦！",
+      "啊啊啊！快站起來了！"
+    ]
+  };
 
   var state = {
     states: [
@@ -180,6 +183,40 @@ var SitTightGame = function(game) {
       explosionImage.anchor.set(0.5);
 
       return explosionImage;
+    },
+    murmur: function(text) {
+      var x = gameWidth - 250;
+      var y = 200;
+      var dialogImage = game.add.image(x, y, this.asset.getAssetKey("dialog.png"));
+      dialogImage.anchor.set(0.5);
+      dialogImage.scale.set(0.7);
+
+      var murmurText = game.add.text(
+        x,
+        y,
+        text,
+        {
+          font: "30px Arial",
+          fill: "#000000"
+        }
+      );
+      murmurText.anchor.set(0.5);
+
+      var murmurGroup = game.add.group();
+      murmurGroup.add(dialogImage);
+      murmurGroup.add(murmurText);
+
+      game.add.tween(murmurGroup).to(
+        {
+          alpha: 0
+        },
+        500,
+        "Linear",
+        true,
+        2000
+      );
+
+      return murmurGroup;
     }
   };
 
@@ -303,6 +340,14 @@ var SitTightGame = function(game) {
               1000,
               function() {
                 keyboard.generateRandomKey();
+              },
+              game
+            );
+            game.time.events.loop(
+              5000,
+              function() {
+                var murmurTexts = constant.murmurTexts;
+                draw.murmur(murmurTexts[game.rnd.between(0, murmurTexts.length - 1)]);
               },
               game
             );
