@@ -10,18 +10,42 @@ var Yoda = function (game) {};
   const RightKey = Phaser.Keyboard.RIGHT;
   const Velocity = 200;
 
+  var selectedCharacter;
+  var characterMenu;
+  var monsters = {};
+  var monsterIndex = 0;
+  var monsterType = ['ufo', 'et', 'meteor'];
+  var monsterDir = [
+  { x: 1, y: 0, from:    0, to: 1280, anchor:[1.0, 0.0], dir: 'x'},
+  { x:-1, y: 0, from: 1280, to:    0, anchor:[0.0, 0.0], dir: 'x'},
+  { x: 0, y: 1, from:    0, to:  720, anchor:[0.0, 1.0], dir: 'y'},
+  { x: 0, y:-1, from:  720, to:    0, anchor:[0.0, 0.0], dir: 'y'}
+  ];
+  var isStart = false;
   var tsai;
   var moveEvent;
   var brush;
   var mapDirty;
   var remainTime = 60, score;
   var remainTimeText, scoreText;
+  var selectedCharacter;
 
   var fontStyle = {font: 'bold 44px Arial', fill: '#fff', boundsAlignH: 'left', boundsAlignV: 'middle'};
 
   const TR_OFFSET_X = -0.307, TR_OFFSET_Y = -0.187, TR_SCALE_X = 0.805, TR_SCALE_Y = 0.695;
   const DIS_OFFSET_X = 0, DIS_OFFSET_Y = 0.1, DIS_SCALE_X = 0.8, DIS_SCALE_Y = 0.7;
   const TEXT_SCORE = 'Score:', TEXT_TIME = 'Time:'
+
+  function createAudioPlayer(audioList) {
+    var audioPlayer = {};
+    for(var i in audioList) {
+      var audioName = audioList[i];
+      audioPlayer[audioName] = game.add.audio(audioName);
+    }
+    return {
+      get: (name) => { return audioPlayer[name]; }
+    };
+  }
 
   function createCharacter(name, bSpr, fSpr, bmd) {
     var character = {};
@@ -30,6 +54,7 @@ var Yoda = function (game) {};
     character.spr.animations.add('right', [0], 1, false);
     game.physics.enable(character.spr, Phaser.Physics.ARCADE);
     character.spr.body.collideWorldBounds = true;
+    character.spr.body.immovable = true;
     character.velocity = Velocity;
     character.moveLeft = function() {
       character.isMoving = true;
@@ -94,7 +119,6 @@ var Yoda = function (game) {};
       var dirtyX = parseInt(x/brush.width);
       var dirtyY = parseInt(y/brush.height);
       var dirtyKey = dirtyX+';'+dirtyY;
-      console.log(dirtyKey)
       if(dirtyKey in this.mapDirty)
         this.mapDirty[dirtyKey] = 1;
     };
@@ -118,6 +142,78 @@ var Yoda = function (game) {};
     return spr;
   }
 
+  // ----- START
+  function createMonster () {
+    console.log('create monster');
+    var type = pickRandomElement(monsterType);
+    var dir  = pickRandomElement(monsterDir);
+    var pos;
+
+    if (dir.dir === 'x') {
+      pos = {x: dir.from, y: game.rnd.integerInRange(0, game.height)};
+      velocity = generateVelocity(pos);
+    } else {
+      pos = {x: game.rnd.integerInRange(0, game.width), y: dir.from};
+      velocity = generateVelocity(pos);
+    }
+    var spr = game.add.sprite(pos.x, pos.y, type);
+    var monster = {
+      id: monsterIndex,
+      spr: spr
+    }
+    game.physics.enable(monster.spr, Phaser.Physics.ARCADE);
+    
+    //monster.body.immovable = true;
+    game.add.tween(spr.body).to( velocity, 3000, Phaser.Easing.Linear.None, true);
+    //monster.body.setSize(monster.width, monster.height, 0, 0);
+    
+    //monster.body.velocity.setTo(velocity.x, velocity.y);
+    game.time.events.add(3000, (context)=>{destroyMonster(context.monster)}, null, {this: this, monster: monster});
+    spr.anchor.setTo(dir.anchor[0], dir.anchor[1]);
+    monsters[monster.id] = monster;
+    monsterIndex++;
+  }
+
+  function destroyMonster(monster) {
+    delete monsters[monster.id];
+    //monsters.splice(monsters.indexOf(monster, 1));
+    monster.spr.destroy();
+  }
+
+  function pickRandomElement (array) {
+    var element = array[Math.floor(Math.random()*array.length)]
+    return element === undefined ? 0: element;
+  }
+
+  function generateVelocity(pos) {
+    function generateTargetParam() {
+      return (game.rnd.integerInRange(0, 4)+3)/10;
+    }
+    var velocity;
+    var seedX = generateTargetParam();
+    var seedY = generateTargetParam();
+    velocity = {
+      x: (game.width*seedX - pos.x)*.8,
+      y: (game.height*seedY - pos.y)*.8,
+    }
+    return velocity;
+  }
+
+  function onMonsterAttack(monster) {
+    console.log('attack by monster: '+monster.id+'!');
+    destroyMonster(monster);
+    audioPlayer.get('monsterhit').play();
+  }
+
+  function checkMonsterCollision () {
+    var tmpMonster = monsters;
+    for (var i in tmpMonster) {
+      var monster = tmpMonster[i];
+      game.physics.arcade.overlap(monster.spr, tsai.spr, ()=> {onMonsterAttack(monster);}, null, monster);
+    }
+  }
+  // ----- ENDfunction
+
   function updateRemainTime() {
     remainTimeText.text = TEXT_TIME+remainTime;
   }
@@ -136,7 +232,8 @@ var Yoda = function (game) {};
 
   function gameOver() {
     //TODO game over
-    console.log('game over')
+    console.log('game over');
+    audioPlayer.get('gameover').play();
   }
 
   Yoda.prototype = {
@@ -144,59 +241,158 @@ var Yoda = function (game) {};
       game = this.game;
       game.load.image('planet_bg', 'media/yoda/planet.jpg');
       game.load.image('brush', 'media/yoda/brush.png');
+      game.load.image('tsai_menu', 'media/yoda/tsai_menu.png');
+      game.load.image('yoda_menu', 'media/yoda/yoda_menu.png');
       game.load.image('tsai_bg', 'media/yoda/tsai_bg.png');
       game.load.image('yoda_bg', 'media/yoda/yoda_bg.png');
       game.load.image('tsai_menu', 'media/yoda/tsai_menu.png');
       game.load.image('yoda_menu', 'media/yoda/yoda_menu.png');
       game.load.spritesheet('tsai', 'media/yoda/tsai.png', 150, 157, 2);
       game.load.spritesheet('yoda', 'media/yoda/yoda.png', 150, 157, 2);
+
       game.load.audio('bgm', ['media/yoda/yoda_bgm.wav']);
+      game.load.audio('gamestart', ['media/yoda/gamestart.mp3']);
+      game.load.audio('gameover', ['media/yoda/gameover.wav']);
+      game.load.audio('monsterhit', ['media/yoda/monsterhit.wav']);
+      game.load.audio('step', ['media/yoda/step.wav']);
+
+      // ----- Monster
+      game.load.image('ufo', 'media/yoda/ufo.png');
+      game.load.image('et', 'media/yoda/et.png');
+      game.load.image('meteor', 'media/yoda/meteor.png');
+
     },
     create: function() {
+      characterMenu = {
+        tsai: {
+          characterName: 'tsai',
+          name: 'tsai_menu',
+          x: game.width*0.05,
+          y: game.height*0.03,
+          bg: [{
+            name: 'yoda_bg',
+            x: TR_OFFSET_X,
+            y: TR_OFFSET_Y,
+            scaleX: TR_SCALE_X,
+            scaleY: TR_SCALE_Y
+          },
+          {
+            name: 'tsai_bg',
+            x: DIS_OFFSET_X,
+            y: DIS_OFFSET_Y,
+            scaleX: DIS_SCALE_X,
+            scaleY: DIS_SCALE_Y
+          }]
+        },
+        yoda: {
+          characterName: 'yoda',
+          name: 'yoda_menu',
+          x: game.width*0.55,
+          y: game.height*0.03,
+          bg: [{
+            name: 'tsai_bg',
+            x: TR_OFFSET_X-0.01,
+            y: TR_OFFSET_Y,
+            scaleX: TR_SCALE_X,
+            scaleY: TR_SCALE_Y
+          },
+          {
+            name: 'yoda_bg',
+            x: DIS_OFFSET_X,
+            y: DIS_OFFSET_Y,
+            scaleX: DIS_SCALE_X,
+            scaleY: DIS_SCALE_Y
+          }]
+        }
+      }
       game.add.sprite(0, 0, 'planet_bg');
-      var music = game.add.audio('bgm');
-      music.loopFull();
+      audioPlayer = createAudioPlayer(['bgm', 'gamestart', 'gameover', 'monsterhit', 'step']);
+      
+      function init() {
+        var menuSprs = [];
+        function createMenuItem(menuItem) {
+          var menuSpr = game.add.sprite(menuItem.x, menuItem.y, menuItem.name);
+          menuSpr.alpha = 0.8;
+          menuSpr.inputEnabled = true;
+          menuSpr.events.onInputOver.add((menuSpr)=>{menuSpr.alpha = 1;}, this, null, menuSpr);
+          menuSpr.events.onInputOut.add((menuSpr)=>{menuSpr.alpha = 0.9;}, this, null, menuSpr);
+          menuSpr.events.onInputDown.add((arg1, arg2, menuItem)=>{
+            selectedCharacter = characterMenu[menuItem.characterName];
+            for(var i in menuSprs) {
+              menuSprs[i].destroy();
+            }
+            preGameStart();
+          }, this, null, menuItem);
+          menuSprs.push(menuSpr);
+        }
+        for(var i in characterMenu) {
+          var menuItem = characterMenu[i];
+          createMenuItem(menuItem);
+        }
+      }
 
-      brush = game.make.sprite(0, 0, 'brush');
-      brush.scale.setTo(2, 1);
-      brush.anchor.set(0.5, 0.5);
+      function preGameStart() {
+        var startAudio = audioPlayer.get('gamestart');
+        startAudio.onStop.add(()=>{
+          audioPlayer.get('bgm').loopFull();
+          isStart = true;
+          gameStart();
+        }, this);
+        initGame();
+        startAudio.play();
+      }
 
-      var yodaSpr = createMagzine('yoda_bg', TR_OFFSET_X, TR_OFFSET_Y, TR_SCALE_X, TR_SCALE_Y);
-      yodaSpr.destroy();
-      var sprite = createMagzine('tsai_bg', DIS_OFFSET_X, DIS_OFFSET_Y, DIS_SCALE_X, DIS_SCALE_Y);
+      function initGame() {
+        brush = game.make.sprite(0, 0, 'brush');
+        brush.scale.setTo(2, 1);
+        brush.anchor.set(0.5, 0.5);
 
-      bmd = game.make.bitmapData(sprite.width, sprite.height);
-      game.add.sprite(sprite.x, sprite.y, bmd);
+        var yodaSpr = createMagzine(selectedCharacter.bg[0].name, selectedCharacter.bg[0].x, selectedCharacter.bg[0].y, selectedCharacter.bg[0].scaleX, selectedCharacter.bg[0].scaleY);
+        yodaSpr.destroy();
+        var sprite = createMagzine(selectedCharacter.bg[1].name, selectedCharacter.bg[1].x, selectedCharacter.bg[1].y, selectedCharacter.bg[1].scaleX, selectedCharacter.bg[1].scaleY);
 
-      game.physics.startSystem(Phaser.Physics.ARCADE);
-      tsai = createCharacter('tsai', yodaSpr, sprite, bmd);
+        bmd = game.make.bitmapData(sprite.width, sprite.height);
+        game.add.sprite(sprite.x, sprite.y, bmd);
 
-      mapDirty = createMapDirty(sprite, brush);
-      console.log(mapDirty);
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        tsai = createCharacter(selectedCharacter.characterName, yodaSpr, sprite, bmd);
 
-      remainTimeText = game.add.text(game.width-200, 100, TEXT_TIME, fontStyle);
-      scoreText = game.add.text(game.width-200, 150, TEXT_SCORE, fontStyle);
+        mapDirty = createMapDirty(sprite, brush);
+      }
 
-      game.time.events.repeat(Phaser.Timer.SECOND, PLAY_TIME, countDown, this);
+      function gameStart() {
 
-      var keyUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
-      keyUp.onDown.add(()=>{tsai.moveUp();}, this);
-      keyUp.onUp.add(()=>{tsai.stop();}, this);
+        remainTimeText = game.add.text(game.width-200, 100, TEXT_TIME, fontStyle);
+        scoreText = game.add.text(game.width-200, 150, TEXT_SCORE, fontStyle);
 
-      var keyDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
-      keyDown.onDown.add(()=>{tsai.moveBottom();}, this);
-      keyDown.onUp.add(()=>{tsai.stop();}, this);
+        game.time.events.repeat(Phaser.Timer.SECOND, PLAY_TIME, countDown, this);
 
-      var keyLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
-      keyLeft.onDown.add(()=>{tsai.moveLeft();}, this);
-      keyLeft.onUp.add(()=>{tsai.stop();}, this);
+        var keyUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+        keyUp.onDown.add(()=>{tsai.moveUp();}, this);
+        keyUp.onUp.add(()=>{tsai.stop();}, this);
 
-      var keyRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-      keyRight.onDown.add(()=>{tsai.moveRight();}, this);
-      keyRight.onUp.add(()=>{tsai.stop();}, this);
+        var keyDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+        keyDown.onDown.add(()=>{tsai.moveBottom();}, this);
+        keyDown.onUp.add(()=>{tsai.stop();}, this);
+
+        var keyLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+        keyLeft.onDown.add(()=>{tsai.moveLeft();}, this);
+        keyLeft.onUp.add(()=>{tsai.stop();}, this);
+
+        var keyRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+        keyRight.onDown.add(()=>{tsai.moveRight();}, this);
+        keyRight.onUp.add(()=>{tsai.stop();}, this);
+
+        // ----- create
+        game.time.events.loop(3000, createMonster, this);
+      }
+      init();
     },
     update: function() {
-      tsai.update();
+      if(isStart) {
+        tsai.update();
+        checkMonsterCollision();
+      }
     },
     render: function() {
     }
