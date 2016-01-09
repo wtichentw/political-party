@@ -49,6 +49,7 @@ var Yoda = function (game) {};
 
   function createCharacter(name, bSpr, fSpr, bmd) {
     var character = {};
+    var stepAudio = audioPlayer.get('step');
     character.spr = game.add.sprite(game.width*0.2, game.height*0.2, name);
     character.spr.animations.add('left', [1], 1, false);
     character.spr.animations.add('right', [0], 1, false);
@@ -56,27 +57,36 @@ var Yoda = function (game) {};
     character.spr.body.collideWorldBounds = true;
     character.spr.body.immovable = true;
     character.velocity = Velocity;
+    character.playStep = function() {
+      if(!stepAudio.isPlaying)
+        stepAudio.loopFull();
+    }
     character.moveLeft = function() {
       character.isMoving = true;
       character.turnLeft();
       character.spr.body.velocity.setTo(-character.velocity, character.spr.body.velocity.y);
+      character.playStep();
     };
     character.moveRight = function() {
       character.isMoving = true;
       character.turnRight();
       character.spr.body.velocity.setTo(character.velocity, character.spr.body.velocity.y);
+      character.playStep();
     };
     character.moveUp = function() {
       character.isMoving = true;
       character.spr.body.velocity.setTo(character.spr.body.velocity.x, -character.velocity);
+      character.playStep();
     };
     character.moveBottom = function() {
       character.isMoving = true;
       character.spr.body.velocity.setTo(character.spr.body.velocity.x, character.velocity);
+      character.playStep();
     };
     character.stop = function() {
       character.isMoving = false;
       character.spr.body.velocity.setTo(0, 0);
+      stepAudio.stop();
     };
     character.mudFloor = function() {
       var x = tsai.spr.x-tsai.spr.width*2.2;
@@ -171,6 +181,11 @@ var Yoda = function (game) {};
     game.time.events.add(3000, (context)=>{destroyMonster(context.monster)}, null, {this: this, monster: monster});
     spr.anchor.setTo(dir.anchor[0], dir.anchor[1]);
     monsters[monster.id] = monster;
+    var audio = audioPlayer.get(type);
+    if(audio) {
+      console.log('asdasd')
+      audio.play();
+    }
     monsterIndex++;
   }
 
@@ -255,6 +270,8 @@ var Yoda = function (game) {};
       game.load.audio('gameover', ['media/yoda/gameover.wav']);
       game.load.audio('monsterhit', ['media/yoda/monsterhit.wav']);
       game.load.audio('step', ['media/yoda/step.wav']);
+      game.load.audio('meteor', ['media/yoda/meteor.wav']);
+      game.load.audio('ufo', ['media/yoda/ufo.wav']);
 
       // ----- Monster
       game.load.image('ufo', 'media/yoda/ufo.png');
@@ -306,7 +323,7 @@ var Yoda = function (game) {};
         }
       }
       game.add.sprite(0, 0, 'planet_bg');
-      audioPlayer = createAudioPlayer(['bgm', 'gamestart', 'gameover', 'monsterhit', 'step']);
+      audioPlayer = createAudioPlayer(['bgm', 'gamestart', 'gameover', 'monsterhit', 'step', 'meteor', 'ufo']);
       
       function init() {
         var menuSprs = [];
