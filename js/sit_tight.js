@@ -310,11 +310,30 @@ var SitTightGame = function(game) {
 
           keyboard.updateAll();
 
-          // keyboard.layer.forEach(
-          //   function(child) {
-          //   },
-          //   this
-          // );
+          keyboard.layer.forEachAlive(
+            function(child) {
+              if (game.input.keyboard.isDown(keyboard.keys[child.getChildAt(1).text])) {
+                pig.sit();
+                child.fallSpeed = 0;
+                child.alive = false;
+                var childTween = game.add.tween(child).to(
+                  {
+                    alpha: 0
+                  },
+                  500,
+                  "Linear",
+                  true
+                );
+                childTween.onComplete.add(
+                  function() {
+                    this.destroy();
+                  },
+                  child
+                );
+              }
+            },
+            this
+          );
 
           break;
       }
