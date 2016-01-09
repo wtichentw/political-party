@@ -171,6 +171,9 @@ var SitTightGame = function(game) {
       group.add(keyText);
 
       return group;
+    },
+    keyboards: function() {
+      return game.add.group();
     }
   };
 
@@ -215,27 +218,30 @@ var SitTightGame = function(game) {
       "Y": Phaser.KeyCode.Y,
       "Z": Phaser.KeyCode.Z
     },
-    currentKeys: [],
+    layer: {},
     generateRandomKey: function() {
       var keysKeys = Object.keys(this.keys);
       var idx = game.rnd.between(0, keysKeys.length - 1);
-      this.currentKeys.push({
-        key: {
-          text: keysKeys[idx],
-          keyCode: this.keys[keysKeys[idx]]
-        },
-        group: draw.keyboard(
-          game.rnd.between(200, gameWidth - 200),
-          -70,
-          keysKeys[idx]
-        ),
-        fallSpeed: game.rnd.between(1, 3)
-      });
+      var group = draw.keyboard(
+        game.rnd.between(200, gameWidth - 200),
+        -70,
+        keysKeys[idx]
+      );
+      group.fallSpeed = game.rnd.between(1, 5);
+      this.layer.add(group);
     },
     updateAll: function() {
-      for (var i = 0; i < this.currentKeys.length; ++i) {
-        this.currentKeys[i].group.y += this.currentKeys[i].fallSpeed;
-      }
+      this.layer.forEach(
+        function(keyboard) {
+          keyboard.forEach(
+            function(child) {
+              child.y += this.fallSpeed;
+            },
+            keyboard
+          );
+        },
+        this
+      );
     }
   };
 
@@ -256,6 +262,7 @@ var SitTightGame = function(game) {
           [draw.bg()],
           [(pig.body = draw.pig())],
           [draw.desk()],
+          [(keyboard.layer = draw.keyboards())],
           draw.explanations()
         ],
         game
@@ -298,33 +305,16 @@ var SitTightGame = function(game) {
           if (pig.body.y >= gameHeight) {
             pig.stand();
           } else {
-            //lose
+            state.nextState();
           }
 
           keyboard.updateAll();
 
-          for (var i = 0; i < keyboard.currentKeys.length; ++i) {
-            if (game.input.keyboard.isDown(keyboard.currentKeys[i].key.keyCode)) {
-              pig.sit();
-              keyboard.currentKeys[i].fallSpeed = 0;
-              var keyboardTween = game.add.tween(keyboard.currentKeys[i].group).to(
-                {
-                  alpha: 0
-                },
-                500,
-                "Linear",
-                true
-              );
-              keyboardTween.onComplete.add(
-                function() {
-                  this.destroy();
-                },
-                keyboard.currentKeys[i].group
-              );
-              keyboard.currentKeys.splice(i, 1);
-              break;
-            }
-          }
+          // keyboard.layer.forEach(
+          //   function(child) {
+          //   },
+          //   this
+          // );
 
           break;
       }
