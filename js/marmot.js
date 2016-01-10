@@ -13,7 +13,7 @@ var Marmot = function (game) {};
   var againBtn, moreBtn, policyBtn, menuBtn, fbBtn;
   var againBtnPress, moreBtnPress, policyBtnPress;
   // ----- START GAME VARIABLE
-  var GAME_TIME = 5000;
+  var GAME_TIME = 60000;
   var MONSTER_SPAWN_TIME = 2500;
   var currentState;
   var bg, bgm, score, scoreText, timeText, gameTimer;
@@ -96,7 +96,7 @@ var Marmot = function (game) {};
   function spawnMonster () {
     var type = pickRandomElement(monsterTypes);
     var pos  = pickRandomElement(monsterEmptyPos);
-    console.log(pos);
+
     if (pos != 0) {
       var monster = game.add.image(monsterPositions[pos].x, monsterPositions[pos].y, type);
       monster.scale.setTo(0.5);
@@ -113,6 +113,8 @@ var Marmot = function (game) {};
         game.time.events.add(2000, function(){destroyMonster(monster, 2000);}, this);
 
       game.world.bringToTop(toolsLayer);
+      console.log(monsterEmptyPos);
+      
     }
   }
 
@@ -134,20 +136,18 @@ var Marmot = function (game) {};
         dirtSound.play();
         monsterHitImg = "sonDirty";
       }
-      console.log("success");
     } else {
       score--;
       wrongSound.play();
       if (monster.monsterType == "marmot")  monsterHitImg = "marmotAngry";
       if (monster.monsterType == "son")     monsterHitImg = "sonWrong";
       if (monster.monsterType == "leaf")    monsterHitImg = "leafWrong";
-      console.log("failure");
     }
     monsterIndex = monster.monsterPos;
     monster.destroy();
     monsterHit = game.add.image(monsterPositions[monsterIndex].x, monsterPositions[monsterIndex].y, monsterHitImg);
     monsterHit.scale.setTo(0.5);
-    // monsterHit.monsterPos = monster.monsterPos;
+    monsterHit.monsterPos = monster.monsterPos;
     destroyMonster(monsterHit, 2000);
     game.world.bringToTop(toolsLayer);
   }
@@ -316,6 +316,10 @@ var Marmot = function (game) {};
   }
 
   function gamePlayUpdate() {
+    // ----- Mouse
+    playerTools[player.tool].x = game.input.activePointer.x;
+    playerTools[player.tool].y = game.input.activePointer.y;
+
     // ----- Keyboard Input
     game.input.keyboard.onDownCallback = function (e) {
       if (e.keyCode == Phaser.KeyCode.SPACEBAR) {
@@ -393,9 +397,9 @@ var Marmot = function (game) {};
       gameTimer = game.time.create(false);
 
       // ----- Text
-      scoreText =  game.add.text(game.width/2-100, 50, 'Score: 0', {font: "32px Arial", fill: "#ff0000"});
+      scoreText =  game.add.text(game.width/2-100, 50, 'Score : 0', {font: "32px Arial", fill: "#ff0000"});
       scoreText.anchor.setTo(1.0, 0.0);
-      timeText  =  game.add.text(game.width/2+100, 50, 'Time: 60', {font: "32px Arial", fill: "#ff0000"});
+      timeText  =  game.add.text(game.width/2+100, 50, 'Time : 60', {font: "32px Arial", fill: "#ff0000"});
       timeText.anchor.setTo(0.0, 0.0);
 
       // ----- Tools
