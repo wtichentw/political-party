@@ -6,6 +6,8 @@ var MainMenu = function(game) {};
   var imageEng;
   var imageShi;
   var imageRose;
+  var imageSon;
+  var imageRealPig;
 
   MainMenu.prototype = {
     preload: function() {
@@ -58,8 +60,8 @@ var MainMenu = function(game) {};
             true,
             false,
             {
-              titleText: "第二話｜做好做滿",
-              subtitleText: "在我任期內，一定會做好做滿。",
+              titleText: "第一話｜坐好坐滿",
+              subtitleText: "在我任期內，一定會坐好坐滿。",
               nextState: {
                 key: "IntroVideo",
                 args: {
@@ -73,12 +75,19 @@ var MainMenu = function(game) {};
           );
         }, images[0]);
 
-        images[2].events.onInputDown.add(function () {
-          //alert('ouch');
-          FB.ui({
-            method: 'share',
-            href: 'http://people.cs.nctu.edu.tw/~wtichen/fb.html',
-          }, function(response){});
+        images[2].events.onInputDown.add(function() {
+          this.game.state.start(
+            "StageIntro",
+            true,
+            false,
+            {
+              titleText: "第二話｜絕地女士",
+              subtitleText: "小英的真實身份居然是…",
+              nextState: {
+                key: "Yoda"
+              }
+            }
+          );
         }, images[2]);
 
         images[3].events.onInputDown.add(function() {
@@ -87,7 +96,7 @@ var MainMenu = function(game) {};
             true,
             false,
             {
-              titleText: "第一話｜馬習會",
+              titleText: "第四話｜馬習會",
               subtitleText: "我的一小握，是台灣的一大握",
               nextState: {
                 key: "ShakeHandGame"
@@ -113,20 +122,20 @@ var MainMenu = function(game) {};
 
         images[6].events.onInputDown.add(function() {
           this.game.state.start(
-            'StageIntro',
+            "StageIntro",
             true,
             false,
             {
-              titleText: '第三話｜宋神掌',
-              subtitleText: 'Happy Farm',
+              titleText: "第三話｜宋神掌",
+              subtitleText: "捏泥巴，捏泥巴，捏捏捏捏捏泥巴",
               nextState: {
-                key: 'Marmot'
+                key: "Marmot"
               }
             }
           );
         }, images[6]);
         // ----- END
       }
-    },
+    }
   };
 })();
