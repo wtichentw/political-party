@@ -271,6 +271,19 @@ var SitTightGame = function(game) {
       lightImage.scale.set(0.5);
 
       return lightImage;
+    },
+    score: function() {
+      var scoreText = game.add.text(
+        50,
+        50,
+        "Score: 0",
+        {
+          font: "50px Arial",
+          fill: "#FF0000"
+        }
+      );
+
+      return scoreText;
     }
   };
 
@@ -347,6 +360,18 @@ var SitTightGame = function(game) {
     }
   };
 
+  var score = {
+    text: {},
+    current: 0,
+    add: function(n) {
+      this.current += (n || 1);
+      this.updateText();
+    },
+    updateText: function() {
+      this.text.text = "Score: " + this.current;
+    }
+  };
+
   SitTightGame.prototype = {
 
     preload: function() {
@@ -364,6 +389,7 @@ var SitTightGame = function(game) {
           bg: [draw.bg()],
           pig: [draw.pig()],
           desk: [draw.desk()],
+          score: [draw.score()],
           keyboards: draw.keyboards(),
           explanations: draw.explanations()
         },
@@ -371,6 +397,7 @@ var SitTightGame = function(game) {
       );
 
       pig.body = layer.pig.getChildAt(0);
+      score.text = layer.score.getChildAt(0);
 
       for (var i = 0; i < 5; ++i) {
         keyboard.generateRandomKey();
@@ -533,6 +560,7 @@ var SitTightGame = function(game) {
                   return;
                 }
                 if (game.input.keyboard.isDown(keyboard.keys[childText.text])) {
+                  score.add();
                   pig.sit();
                   child.fallSpeed = 0;
                   child.alive = false;
