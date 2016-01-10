@@ -16,8 +16,10 @@ var Yoda = function (game) {};
 
   const DIRECTION = { NONE: 0, LEFT: 1, RIGHT: 2, UP: 3, BOTTOM: 4 };
 
+  var isCountDown;
   var selectedCharacter;
   var characterMenu;
+  var expPics = ['explain3', 'explain2', 'explain1'];
   var monsters = {};
   var monsterIndex = 0;
   var monsterType = ['ufo', 'et', 'meteor'];
@@ -223,7 +225,7 @@ var Yoda = function (game) {};
       spr: spr
     };
     game.physics.enable(monster.spr, Phaser.Physics.ARCADE);
-    
+
     game.add.tween(spr.body).to( velocity, 3000, Phaser.Easing.Linear.None, true);
 
     game.time.events.add(3000, (context)=>{meetMonster(context.monster);}, null, {this: this, monster: monster});
@@ -349,6 +351,9 @@ var Yoda = function (game) {};
       game.load.image('et', 'media/yoda/et.png');
       game.load.image('meteor', 'media/yoda/meteor.png');
 
+      game.load.image('explain1', 'media/yoda/explain1.jpg');
+      game.load.image('explain2', 'media/yoda/explain2.jpg');
+      game.load.image('explain3', 'media/yoda/explain3.jpg');
     },
     create: function() {
       characterMenu = {
@@ -395,7 +400,63 @@ var Yoda = function (game) {};
       }
       game.add.sprite(0, 0, 'planet_bg');
       audioPlayer = createAudioPlayer(['bgm', 'gamestart', 'gameover', 'Ahhh2', 'step', 'meteor', 'ufo']);
-      
+
+      function preInitIntro() {
+        var expTmp;
+
+        for (var i = 0; i < expPics.length; i++) {
+          expTmp = game.add.image(0, 0, expPics[i]);
+          expTmp.inputEnabled = true;
+          expTmp.picID = i;
+          expTmp.events.onInputDown.add(function () {
+            this.visible = false;
+            this.destroy();
+            if (this.picID === 0) {
+              init();
+            }
+          }, expTmp);
+        }
+      }
+
+      function preGameCountDown() {
+        var texts = ["3", "2", "1", "GO!"];
+        for (var i = 0; i < 4; ++i) {
+          game.time.events.add(
+            i * 1000,
+            function(text) {
+              var countDownText = game.add.text(
+                gameWidth / 2,
+                gameHeight / 2,
+                text,
+                {
+                  font: "100px Arial",
+                  fill: "#FF0000"
+                }
+              );
+              countDownText.anchor.set(0.5);
+              var countDownTextTween = game.add.tween(countDownText).to(
+                {
+                  alpha: 0
+                },
+                1000,
+                "Linear",
+                true
+              );
+              if (text === "GO!") {
+                countDownTextTween.onComplete.add(
+                  function() {
+
+                  },
+                  game
+                );
+              }
+            },
+            game,
+            texts[i]
+          );
+        }
+      }
+
       function init() {
         var menuSprs = [];
         function createMenuItem(menuItem) {
@@ -420,6 +481,7 @@ var Yoda = function (game) {};
       }
 
       function preGameStart() {
+        preGameCountDown();
         var startAudio = audioPlayer.get('gamestart');
         startAudio.onStop.add(()=>{
           audioPlayer.get('bgm').loopFull();
@@ -477,7 +539,8 @@ var Yoda = function (game) {};
         // ----- create
         createMonsterEvent = game.time.events.loop(SPAWN_MONSTER_TIME, createMonster, this);
       }
-      init();
+      preInitIntro();
+      //init();
     },
     update: function() {
       if(isStart) {
