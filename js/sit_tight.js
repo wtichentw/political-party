@@ -22,7 +22,11 @@ var SitTightGame = function(game) {
         "grandma.webm"
       ],
       audios: [
-        "bgm.mp3"
+        "bgm.mp3",
+        "game_start.mp3",
+        "hit.mp3",
+        "explosion.mp3",
+        "game_over.mp3"
       ]
     }
   );
@@ -152,6 +156,7 @@ var SitTightGame = function(game) {
               countDownTextTween.onComplete.add(
                 function() {
                   state.nextState();
+                  audio.gameStart.play();
                 },
                 game
               );
@@ -404,6 +409,11 @@ var SitTightGame = function(game) {
       }
 
       audio.bgm = game.add.audio(this.asset.getAssetKey("bgm.mp3"));
+      audio.gameStart = game.add.audio(this.asset.getAssetKey("game_start.mp3"));
+      audio.hit = game.add.audio(this.asset.getAssetKey("hit.mp3"));
+      audio.explosion = game.add.audio(this.asset.getAssetKey("explosion.mp3"));
+      audio.gameOver = game.add.audio(this.asset.getAssetKey("game_over.mp3"));
+
       audio.bgm.play();
 
     },
@@ -445,7 +455,7 @@ var SitTightGame = function(game) {
                 game
               );
               game.time.events.add(
-                5000,
+                20000,
                 function() {
                   var warningText = draw.warning();
                   warningText.alpha = 0;
@@ -544,6 +554,7 @@ var SitTightGame = function(game) {
                 var childImage = child.getChildAt(0);
                 var childText = child.getChildAt(1);
                 if (childImage.y + 35 >= gameHeight) {
+                  audio.explosion.play();
                   pig.stand(5);
                   var explosionImage = draw.explosion(childImage.x);
                   game.add.tween(explosionImage).to(
@@ -560,6 +571,7 @@ var SitTightGame = function(game) {
                   return;
                 }
                 if (game.input.keyboard.isDown(keyboard.keys[childText.text])) {
+                  audio.hit.play();
                   score.add();
                   pig.sit();
                   child.fallSpeed = 0;
@@ -587,7 +599,7 @@ var SitTightGame = function(game) {
 
           case "GameOver":
             if (!currentState.isStarted) {
-              audio.bgm.stop();
+              game.sound.stopAll();
               game.time.events.stop();
             }
 
