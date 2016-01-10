@@ -9,6 +9,9 @@ var Yoda = function (game) {};
   const LeftKey = Phaser.Keyboard.LEFT;
   const RightKey = Phaser.Keyboard.RIGHT;
   const Velocity = 200;
+  const VELOCITY_PARAM = 1.2;
+  const MASK_WIDTH = 32, MASK_HEIGHT = 32;
+  const BG_OFFSET_X = 0, BG_OFFSET_Y = 0.15;
 
   var selectedCharacter;
   var characterMenu;
@@ -24,7 +27,6 @@ var Yoda = function (game) {};
   var isStart = false;
   var tsai;
   var moveEvent;
-  var brush;
   var mapDirty;
   var remainTime = 60, score;
   var remainTimeText, scoreText;
@@ -47,7 +49,7 @@ var Yoda = function (game) {};
     };
   }
 
-  function createCharacter(name, bSpr, fSpr, bmd) {
+  function createCharacter(name, bSpr) {
     var character = {};
     var stepAudio = audioPlayer.get('step');
     character.spr = game.add.sprite(game.width*0.2, game.height*0.2, name);
@@ -89,13 +91,14 @@ var Yoda = function (game) {};
       stepAudio.stop();
     };
     character.mudFloor = function() {
-      var x = tsai.spr.x-tsai.spr.width*2.2;
-      var y = tsai.spr.y-tsai.spr.height/2;
-      brush.x = x;
-      brush.y = y;
-      var dirtyY = tsai.spr.y+tsai.spr.height;
-      mapDirty.setMapDirty(tsai.spr.x-fSpr.x, dirtyY-fSpr.y);
-      bmd.alphaMask(bSpr, brush);
+      var spr = character.spr;
+      var dirtyKey = mapDirty.calculateDirtyKey(spr);
+      var x = spr.x-spr.width*2.2;
+      var y = spr.y-spr.height/2;
+
+      mapDirty.setMapDirty(dirtyKey.x, dirtyKey.y);
+
+      maskBg(x, y);
       score = mapDirty.getProgress();
       updateScore();
     };
@@ -114,23 +117,33 @@ var Yoda = function (game) {};
   }
 
   function createMapDirty(spr) {
-    var mapDirty = {}
+    var mapDirty = {};
     var total = 0;
-    for(var i = 0; i < spr.width/brush.width; i++) {
-      for(var j = 0; j < spr.height/brush.height; j++) {
-        mapDirty[i+';'+j] = 0;
+    var lWidth = spr.width/MASK_WIDTH;
+    var lHeight = spr.height/MASK_HEIGHT;
+    for(var i = 0; i < lWidth; i++) {
+      for(var j = 0; j < lHeight; j++) {
+        var key = i+';'+j;
+        mapDirty[key] = 0;
         total++;
       }
     }
     var mapDirtyMgr = {
       mapDirty: mapDirty
     };
+    mapDirtyMgr.calculateDirtyKey = function(characterSpr) {
+      var x = characterSpr.x - bgPos.x;
+      var y = characterSpr.y+characterSpr.height-bgPos.y;
+      console.log(x, y);
+      var dirtyX = parseInt(Math.round(x/MASK_WIDTH));
+      var dirtyY = parseInt(Math.round(y/MASK_HEIGHT));
+      return { x: dirtyX, y: dirtyY };
+    }
     mapDirtyMgr.setMapDirty = function(x, y) {
-      var dirtyX = parseInt(x/brush.width);
-      var dirtyY = parseInt(y/brush.height);
-      var dirtyKey = dirtyX+';'+dirtyY;
-      if(dirtyKey in this.mapDirty)
+      var dirtyKey = x+';'+y;
+      if(dirtyKey in this.mapDirty) {
         this.mapDirty[dirtyKey] = 1;
+      }
     };
     mapDirtyMgr.getProgress = function() {
       var count = 0;
@@ -143,55 +156,56 @@ var Yoda = function (game) {};
     return mapDirtyMgr;
   }
 
-  function createMagzine(name, offsetX, offsetY, scalingX, scalingY) {
-    var spr = game.add.sprite(0, 0, name);
-    var bgScale = Math.min(game.width/spr.width, game.height/spr.height);
-    spr.x = (game.width-spr.width)/2+offsetX*game.width;
-    spr.y = (game.height-spr.height)/2+offsetY*game.height;
-    spr.scale.setTo(bgScale*scalingX, bgScale*scalingY);
-    return spr;
+  function calculateBackgroundPosition(spr, offsetX, offsetY) {
+    var x = (game.width-spr.width)/2+offsetX*game.width;
+    var y = (game.height-spr.height)/2+offsetY*game.height;
+    return {x: x, y: y};
   }
 
   // ----- START
   function createMonster () {
-    console.log('create monster');
     var type = pickRandomElement(monsterType);
     var dir  = pickRandomElement(monsterDir);
     var pos;
+    var scale;
 
     if (dir.dir === 'x') {
       pos = {x: dir.from, y: game.rnd.integerInRange(0, game.height)};
       velocity = generateVelocity(pos);
+      scale = convertScaleByVelocity(velocity);
     } else {
       pos = {x: game.rnd.integerInRange(0, game.width), y: dir.from};
       velocity = generateVelocity(pos);
+      scale = convertScaleByVelocity(velocity);
     }
     var spr = game.add.sprite(pos.x, pos.y, type);
+    spr.scale.setTo(scale.x, scale.y);
     var monster = {
       id: monsterIndex,
       spr: spr
-    }
+    };
     game.physics.enable(monster.spr, Phaser.Physics.ARCADE);
     
-    //monster.body.immovable = true;
     game.add.tween(spr.body).to( velocity, 3000, Phaser.Easing.Linear.None, true);
-    //monster.body.setSize(monster.width, monster.height, 0, 0);
-    
-    //monster.body.velocity.setTo(velocity.x, velocity.y);
-    game.time.events.add(3000, (context)=>{destroyMonster(context.monster)}, null, {this: this, monster: monster});
+
+    game.time.events.add(3000, (context)=>{meetMonster(context.monster);}, null, {this: this, monster: monster});
     spr.anchor.setTo(dir.anchor[0], dir.anchor[1]);
     monsters[monster.id] = monster;
     var audio = audioPlayer.get(type);
     if(audio) {
-      console.log('asdasd')
       audio.play();
     }
     monsterIndex++;
   }
 
+  function meetMonster(monster) {
+    destroyMonster(monster);
+    remainTime -= 1;
+    updateRemainTime();
+  }
+
   function destroyMonster(monster) {
     delete monsters[monster.id];
-    //monsters.splice(monsters.indexOf(monster, 1));
     monster.spr.destroy();
   }
 
@@ -208,10 +222,14 @@ var Yoda = function (game) {};
     var seedX = generateTargetParam();
     var seedY = generateTargetParam();
     velocity = {
-      x: (game.width*seedX - pos.x)*.8,
-      y: (game.height*seedY - pos.y)*.8,
+      x: (game.width*seedX - pos.x)*VELOCITY_PARAM,
+      y: (game.height*seedY - pos.y)*VELOCITY_PARAM,
     }
     return velocity;
+  }
+
+  function convertScaleByVelocity(velocity) {
+    return { x: velocity.x<0?-1:1, y: 1 };
   }
 
   function onMonsterAttack(monster) {
@@ -246,16 +264,24 @@ var Yoda = function (game) {};
   }
 
   function gameOver() {
-    //TODO game over
-    console.log('game over');
     audioPlayer.get('gameover').play();
+  }
+
+  function maskBg(x, y) {
+    if(x >= 0 && y >= 0 && x < bgPos.x && y < bgPos.y) {
+      var mask = game.make.bitmapData(MASK_WIDTH+x, MASK_HEIGHT+y);
+      var maskRect = new Phaser.Rectangle(x, y, MASK_WIDTH, MASK_HEIGHT);
+      mask.copyRect(fBg, maskRect, x, y);
+      bmd.alphaMask(bBg, mask.canvas);
+      var rect = new Phaser.Rectangle(x, y, MASK_WIDTH, MASK_HEIGHT);
+      bg1BMD.copyRect(bmd.canvas, rect, x, y);
+    }
   }
 
   Yoda.prototype = {
     preload: function() {
       game = this.game;
       game.load.image('planet_bg', 'media/yoda/planet.jpg');
-      game.load.image('brush', 'media/yoda/brush.png');
       game.load.image('tsai_menu', 'media/yoda/tsai_menu.png');
       game.load.image('yoda_menu', 'media/yoda/yoda_menu.png');
       game.load.image('tsai_bg', 'media/yoda/tsai_bg.png');
@@ -360,21 +386,24 @@ var Yoda = function (game) {};
       }
 
       function initGame() {
-        brush = game.make.sprite(0, 0, 'brush');
-        brush.scale.setTo(2, 1);
-        brush.anchor.set(0.5, 0.5);
 
-        var yodaSpr = createMagzine(selectedCharacter.bg[0].name, selectedCharacter.bg[0].x, selectedCharacter.bg[0].y, selectedCharacter.bg[0].scaleX, selectedCharacter.bg[0].scaleY);
-        yodaSpr.destroy();
-        var sprite = createMagzine(selectedCharacter.bg[1].name, selectedCharacter.bg[1].x, selectedCharacter.bg[1].y, selectedCharacter.bg[1].scaleX, selectedCharacter.bg[1].scaleY);
+        bBg = game.cache.getImage(selectedCharacter.bg[0].name);
+        fBg = game.cache.getImage(selectedCharacter.bg[1].name);
+        bg1BMD = game.make.bitmapData(fBg.width, fBg.height);
+        bg1BMD.draw(fBg, 0, 0);
+        bg1BMD.update();
 
-        bmd = game.make.bitmapData(sprite.width, sprite.height);
-        game.add.sprite(sprite.x, sprite.y, bmd);
+        bgPos = calculateBackgroundPosition(bBg, BG_OFFSET_X, BG_OFFSET_Y);
+        game.add.sprite(bgPos.x, bgPos.y, bg1BMD);
+
+        var w = bBg.width, h = bBg.height;
+
+        bmd = game.make.bitmapData(w, h);
 
         game.physics.startSystem(Phaser.Physics.ARCADE);
-        tsai = createCharacter(selectedCharacter.characterName, yodaSpr, sprite, bmd);
+        tsai = createCharacter(selectedCharacter.characterName, bBg);
 
-        mapDirty = createMapDirty(sprite, brush);
+        mapDirty = createMapDirty(bBg);
       }
 
       function gameStart() {
