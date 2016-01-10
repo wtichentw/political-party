@@ -2,7 +2,8 @@ var Marmot = function (game) {};
 
 (function () {
   "use strict";
-  var dirtSound, toolSound, waterSound, gameOverSound, wrongSound;
+  // ----- AUDIO
+  var dirtSound, toolSound, waterSound, gameOverSound, wrongSound, startSound;
   // ----- STATE
   var isIntro = false, isPlay = false, isOver = false;
   // ----- START EXPLAIN VAR
@@ -46,6 +47,46 @@ var Marmot = function (game) {};
     }
   };
   // ----- END GAME VARIABLE
+  function countDown() {
+   var texts = ["3", "2", "1", "GO!"];
+   for (var i = 0; i < 4; ++i) {
+     game.time.events.add(
+       i * 1000,
+       function(text) {
+         var countDownText = game.add.text(
+           gameWidth / 2,
+           gameHeight / 2,
+           text,
+           {
+             font: "100px Arial",
+             fill: "#FF0000"
+           }
+         );
+         countDownText.anchor.set(0.5);
+         var countDownTextTween = game.add.tween(countDownText).to(
+           {
+             alpha: 0
+           },
+           1000,
+           "Linear",
+           true
+         );
+         if (text === "GO!") {
+           countDownTextTween.onComplete.add(
+             function() {
+               currentState = 'gamePlay';
+               startSound.play();
+             },
+             game
+           );
+         }
+       },
+       game,
+       texts[i]
+     );
+   }
+ }
+
   function rndSpawnMonster () {
     var monsterAmount = game.rnd.integerInRange(1, 3);
     for (var i = 0; i < monsterAmount; i++)
@@ -130,7 +171,6 @@ var Marmot = function (game) {};
   }
 
   function gameIntroInit() {
-    bgm.play();
     isIntro = true;
     explainIndex = 1;
     explainCur = game.add.image(0, 0, "explain"+explainIndex);
@@ -142,6 +182,7 @@ var Marmot = function (game) {};
 
   function gamePlayInit() {
     isPlay = true;
+    bgm.play();
     gameTimer.add(GAME_TIME, function(){ currentState = "gameOver";}, this);
     gameTimer.start();
     game.time.events.loop(MONSTER_SPAWN_TIME, rndSpawnMonster, this);
@@ -258,7 +299,8 @@ var Marmot = function (game) {};
     explainIndex++;
     explainCur.destroy();
     if (explainIndex == EXPLAIN_COUNT)
-      currentState = "gamePlay";
+      countDown();
+      //currentState = "gamePlay";
     else {
       explainCur = game.add.image(0, 0, "explain"+explainIndex);
       explainCur.inputEnabled = true;
@@ -267,11 +309,13 @@ var Marmot = function (game) {};
     }
   }
 
-  function gamePlayUpdate() {
+  function gameIntroUpdate () {
     // ----- Mouse
     playerTools[player.tool].x = game.input.activePointer.x;
     playerTools[player.tool].y = game.input.activePointer.y;
+  }
 
+  function gamePlayUpdate() {
     // ----- Keyboard Input
     game.input.keyboard.onDownCallback = function (e) {
       if (e.keyCode == Phaser.KeyCode.SPACEBAR) {
@@ -330,6 +374,7 @@ var Marmot = function (game) {};
       game.load.audio("toolSound", "media/marmot/tool.mp3");
       game.load.audio("waterSound", "media/marmot/water.mp3");
       game.load.audio("wrongSound", "media/marmot/wrong.mp3");
+      game.load.audio("startSound", "media/marmot/start.mp3");
     },
     create: function () {
       // ----- Background Element
@@ -337,19 +382,20 @@ var Marmot = function (game) {};
 
       // ----- Audio
       bgm = game.add.audio("bgm", 1, true);
-      dirtSound = game.add.audio("dirtSound", 2, false);
-      waterSound = game.add.audio("waterSound", 2, false);
-      wrongSound = game.add.audio("wrongSound", 2, false);
-      toolSound = game.add.audio("toolSound", 2, false);
-      gameOverSound = game.add.audio("gameOverSound", 2, false);
+      dirtSound = game.add.audio("dirtSound", 3, false);
+      waterSound = game.add.audio("waterSound", 3, false);
+      wrongSound = game.add.audio("wrongSound", 3, false);
+      toolSound = game.add.audio("toolSound", 3, false);
+      gameOverSound = game.add.audio("gameOverSound", 3, false);
+      startSound = game.add.audio("startSound", 3, false);
 
       // ----- Timer
       gameTimer = game.time.create(false);
 
       // ----- Text
-      scoreText =  game.add.text(game.width/2-100, 50, 0, {font: "32px Arial", fill: "#ff0000"});
+      scoreText =  game.add.text(game.width/2-100, 50, 'Score: 0', {font: "32px Arial", fill: "#ff0000"});
       scoreText.anchor.setTo(1.0, 0.0);
-      timeText  =  game.add.text(game.width/2+100, 50, 60, {font: "32px Arial", fill: "#ff0000"});
+      timeText  =  game.add.text(game.width/2+100, 50, 'Time: 60', {font: "32px Arial", fill: "#ff0000"});
       timeText.anchor.setTo(0.0, 0.0);
 
       // ----- Tools
@@ -379,7 +425,7 @@ var Marmot = function (game) {};
       switch (currentState) {
         case "gameIntro":
           if (!isIntro) gameIntroInit();
-          //gameIntroUpdate();
+          gameIntroUpdate();
           break;
         case "gamePlay":
           if (!isPlay) gamePlayInit();
