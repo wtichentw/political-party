@@ -7,10 +7,10 @@ var Marmot = function (game) {};
   var explains = [], explainIndex, explainCur;
   var EXPLAIN_COUNT = 3+1;
   // ----- START RESULT VARIABLE
-  var againBtn, moreBtn, policyBtn, menuBtn;
+  var againBtn, moreBtn, policyBtn, menuBtn, fbBtn;
   var againBtnPress, moreBtnPress, policyBtnPress;
   // ----- START GAME VARIABLE
-  var GAME_TIME = 60000;
+  var GAME_TIME = 5000;
   var MONSTER_SPAWN_TIME = 2500;
   var MARMOT_DISAPPEAR_TIME = 2000;
   var currentState;
@@ -38,6 +38,7 @@ var Marmot = function (game) {};
       playerTools[this.tool].visible = true;
     },
     changeTool: function (tool) {
+      toolSound.play();
       playerTools[this.tool].visible = false;
       playerTools[tool].visible = true;
       this.tool = tool;
@@ -83,11 +84,18 @@ var Marmot = function (game) {};
     var monsterHitImg, monsterHit, monasterIndex;
     if (success[0] || success[1]) {
       score++;
-      if (monster.monsterType == 'leaf')    monsterHitImg = 'leafGrew';
-      if (monster.monsterType == 'son')     monsterHitImg = 'sonDirty';
+      if (monster.monsterType == 'leaf') {
+        waterSound.play();
+        monsterHitImg = 'leafGrew';
+      }
+      if (monster.monsterType == 'son') {
+        dirtSound.play();
+        monsterHitImg = 'sonDirty';
+      }
       console.log('success');
     } else {
       score--;
+      wrongSound.play();
       if (monster.monsterType == 'marmot')  monsterHitImg = 'marmotAngry';
       if (monster.monsterType == 'son')     monsterHitImg = 'sonWrong';
       if (monster.monsterType == 'leaf')    monsterHitImg = 'leafWrong';
@@ -97,7 +105,7 @@ var Marmot = function (game) {};
     monster.destroy();
     monsterHit = game.add.image(monsterPositions[monsterIndex].x, monsterPositions[monsterIndex].y, monsterHitImg);
     monsterHit.scale.setTo(0.5);
-    monsterHit.monsterPos = monster.monsterPos;
+    // monsterHit.monsterPos = monster.monsterPos;
     destroyMonster(monsterHit, 2000);
     game.world.bringToTop(toolsLayer);
   }
@@ -121,6 +129,7 @@ var Marmot = function (game) {};
   }
 
   function gameIntroInit() {
+    bgm.play();
     isIntro = true;
     explainIndex = 1;
     explainCur = game.add.image(0, 0, 'explain'+explainIndex);
@@ -135,13 +144,13 @@ var Marmot = function (game) {};
     gameTimer.add(GAME_TIME, function(){ currentState = 'gameOver';}, this);
     gameTimer.start();
     game.time.events.loop(MONSTER_SPAWN_TIME, rndSpawnMonster, this);
-    bgm.play();
   }
 
 
   function gameOverInit() {
     isOver = true;
     bgm.stop();
+    gameOverSound.play();
     //alert('Game\'s over');
     // ----- Clean up and change state
     game.world.removeAll();
@@ -194,6 +203,13 @@ var Marmot = function (game) {};
     menuBtn.inputEnabled = true;
     menuBtn.buttonID = 4;
     menuBtn.events.onInputUp.add(buttonUp, this);
+
+    fbBtn = game.add.image(50, game.height-50, 'fb');
+    fbBtn.anchor.setTo(0.0, 1.0);
+    fbBtn.scale.setTo(0.5);
+    fbBtn.inputEnabled = true;
+    fbBtn.buttonID = 5;
+    fbBtn.events.onInputUp.add(buttonUp, this);
   }
 
   function buttonDown (button) {
@@ -226,6 +242,11 @@ var Marmot = function (game) {};
       case 4:
         game.state.start('MainMenu');
         break;
+      case 5:
+        FB.ui({
+          method: 'share',
+          href: 'https://politicalparty.tw',
+        });
       default:
         break;
     }
@@ -274,7 +295,7 @@ var Marmot = function (game) {};
       game = this.game;
       // ----- Background
       game.load.image('bg', 'media/marmot/Garden.png');
-      game.load.audio('bgm', 'media/marmot/son_bgm.mp3');
+      game.load.image('fb', 'media/fb_icon.png');
       // ----- Exlain
       game.load.image('explain1', 'media/marmot/explain1.jpg');
       game.load.image('explain2', 'media/marmot/explain2.jpg');
@@ -300,20 +321,33 @@ var Marmot = function (game) {};
       game.load.image('policy', 'media/ending/Politic_strategy.png');
       game.load.image('policyPress', 'media/ending/Politic_strategy_press.png');
       game.load.image('menu', 'media/ending/Back_to_park.png');
+      // ----- audio
+      game.load.audio('bgm', 'media/marmot/son_bgm.mp3');
+      game.load.audio('dirtSound', 'media/marmot/dirt.mp3');
+      game.load.audio('gameOverSound', 'media/marmot/game_over.mp3');
+      game.load.audio('toolSound', 'media/marmot/tool.mp3');
+      game.load.audio('waterSound', 'media/marmot/water.mp3');
+      game.load.audio('wrongSound', 'media/marmot/wrong.mp3');
     },
     create: function () {
-
       // ----- Background Element
       bg = game.add.image(0, 0, 'bg');
+
+      // ----- Audio
       bgm = game.add.audio('bgm', 1, true);
+      dirtSound = game.add.audio('dirtSound', 2, false);
+      waterSound = game.add.audio('waterSound', 2, false);
+      wrongSound = game.add.audio('wrongSound', 2, false);
+      toolSound = game.add.audio('toolSound', 2, false);
+      gameOverSound = game.add.audio('gameOverSound', 2, false);
 
       // ----- Timer
       gameTimer = game.time.create(false);
 
       // ----- Text
-      scoreText =  game.add.text(game.width/2-100, 50, 0, {font: '28px Arial', fill: '#000000'});
+      scoreText =  game.add.text(game.width/2-100, 50, 0, {font: '32px Arial', fill: '#ff0000'});
       scoreText.anchor.setTo(1.0, 0.0);
-      timeText  =  game.add.text(game.width/2+100, 50, 60, {font: '28px Arial', fill: '#000000'});
+      timeText  =  game.add.text(game.width/2+100, 50, 60, {font: '32px Arial', fill: '#ff0000'});
       timeText.anchor.setTo(0.0, 0.0);
 
       // ----- Tools
@@ -336,7 +370,8 @@ var Marmot = function (game) {};
       score = 0;
       player.init("waterpot");
       monsterEmptyPos = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-      currentState = 'gameIntro';
+
+      currentState = 'gameOver';
     },
     update: function () {
       switch (currentState) {
