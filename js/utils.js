@@ -1,20 +1,24 @@
 "use strict";
 
 function drawLayersInOrder(layers, game) {
-  if (!Array.isArray(layers)) {
-    throw "Parameters of function drawLayersInOrder must be an array.";
+  if (typeof layers !== "object") {
+    throw "The first parameter must be an object.";
   }
 
-  for (var i = 0; i < layers.length; ++i) {
+  var resultLayers = {};
+  for (var key in layers) {
     var layer;
-    if (Array.isArray(layers[i])) {
+    if (Array.isArray(layers[key])) {
       layer = game.add.group();
-      for (var j = 0; j < layers[i].length; ++j) {
-        layer.add(layers[i][j]);
+      for (var i = 0; i < layers[key].length; ++i) {
+        layer.add(layers[key][i]);
       }
     } else {
-      layer = layers[i];
+      layer = layers[key];
     }
     game.world.bringToTop(layer);
+    resultLayers[key] = layer;
   }
+
+  return resultLayers;
 }
