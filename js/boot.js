@@ -22,7 +22,7 @@ Boot.prototype = {
       {
         videoPath: "media/intro.webm",
         nextState: {
-          key: "MainMenu",
+          key: "MainMenu"
         }
       }
     );

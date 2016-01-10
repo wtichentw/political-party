@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="css/main.css" />
     <script src="js/fb.js"></script>
     <script src="js/phaser.min.js"></script>
+    <script src="js/asset.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/boot.js"></script>
     <script src="js/intro_video.js"></script>
     <script src="js/main_menu.js"></script>
@@ -22,6 +24,7 @@
     <script src="js/second.js"></script>
     <script src="js/flappy_pig.js"></script>
     <script src="js/marmot.js"></script>
+    <script src="js/yoda.js"></script>
     <title>政治派對</title>
   </head>
   <body>
@@ -40,6 +43,7 @@
         game.state.add("Second", Second);
         game.state.add("FlappyPig", FlappyPig);
         game.state.add("Marmot", Marmot);
+        game.state.add("Yoda", Yoda);
 
         game.state.start("Boot");
       })();
