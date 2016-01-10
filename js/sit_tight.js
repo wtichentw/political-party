@@ -20,6 +20,9 @@ var SitTightGame = function(game) {
       ],
       videos: [
         "grandma.webm"
+      ],
+      audios: [
+        "bgm.mp3"
       ]
     }
   );
@@ -271,7 +274,9 @@ var SitTightGame = function(game) {
     }
   };
 
-  var layers = {};
+  var audio = {};
+
+  var layer = {};
 
   var pig = {
     body: {},
@@ -325,10 +330,10 @@ var SitTightGame = function(game) {
         keysKeys[idx]
       );
       group.fallSpeed = game.rnd.between(1, 5);
-      layers.keyboards.add(group);
+      layer.keyboards.add(group);
     },
     updateAll: function() {
-      layers.keyboards.forEach(
+      layer.keyboards.forEach(
         function(keyboard) {
           keyboard.forEach(
             function(child) {
@@ -354,7 +359,7 @@ var SitTightGame = function(game) {
 
     create: function() {
 
-      layers = drawLayersInOrder(
+      layer = drawLayersInOrder(
         {
           bg: [draw.bg()],
           pig: [draw.pig()],
@@ -365,11 +370,14 @@ var SitTightGame = function(game) {
         game
       );
 
-      pig.body = layers.pig.getChildAt(0);
+      pig.body = layer.pig.getChildAt(0);
 
       for (var i = 0; i < 5; ++i) {
         keyboard.generateRandomKey();
       }
+
+      audio.bgm = game.add.audio(this.asset.getAssetKey("bgm.mp3"));
+      audio.bgm.play();
 
     },
 
@@ -440,6 +448,7 @@ var SitTightGame = function(game) {
                         function() {
                           game.time.events.pause();
                           state.isPaused = true;
+                          audio.bgm.pause();
                           var grandmaVideoLayer = draw.grandmaVideo();
                           var grandmaVideo = grandmaVideoLayer.getChildAt(1).key;
                           grandmaVideo.play();
@@ -451,7 +460,7 @@ var SitTightGame = function(game) {
                                 pig.body.y - pig.body.height + 10
                               );
                               lightImage.alpha = 0;
-                              layers.pig.add(lightImage);
+                              layer.pig.add(lightImage);
                               var lightImageTween = game.add.tween(lightImage).to(
                                 {
                                   x: pig.body.x + 50,
@@ -464,8 +473,8 @@ var SitTightGame = function(game) {
                               );
                               game.add.tween(lightImage.scale).to(
                                 {
-                                  x: 1,
-                                  y: 1
+                                  x: 2,
+                                  y: 2
                                 },
                                 2000,
                                 "Linear",
@@ -474,7 +483,8 @@ var SitTightGame = function(game) {
                               lightImageTween.onComplete.add(
                                 function() {
                                   this.destroy();
-                                  pig.stand(50);
+                                  pig.stand(100);
+                                  audio.bgm.resume();
                                   state.isPaused = false;
                                   game.time.events.resume();
                                 },
@@ -502,7 +512,7 @@ var SitTightGame = function(game) {
 
             keyboard.updateAll();
 
-            layers.keyboards.forEachAlive(
+            layer.keyboards.forEachAlive(
               function(child) {
                 var childImage = child.getChildAt(0);
                 var childText = child.getChildAt(1);
@@ -542,13 +552,14 @@ var SitTightGame = function(game) {
                   );
                 }
               },
-              layers.keyboards
+              layer.keyboards
             );
 
             break;
 
           case "GameOver":
             if (!currentState.isStarted) {
+              audio.bgm.stop();
               game.time.events.stop();
             }
 
