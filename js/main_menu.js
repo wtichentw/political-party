@@ -129,7 +129,13 @@ var MainMenu = function(game) {};
               titleText: "第三話｜宋神掌",
               subtitleText: "捏泥巴，捏泥巴，捏捏捏捏捏泥巴",
               nextState: {
-                key: "Marmot"
+                key: "IntroVideo",
+                args: {
+                  videoPath: "media/marmot/intro.webm",
+                  nextState: {
+                    key: "Marmot"
+                  }
+                }
               }
             }
           );
