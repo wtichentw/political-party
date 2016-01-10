@@ -185,7 +185,7 @@ var Yoda = function (game) {};
       spr: spr
     };
     game.physics.enable(monster.spr, Phaser.Physics.ARCADE);
-    
+
     game.add.tween(spr.body).to( velocity, 3000, Phaser.Easing.Linear.None, true);
 
     game.time.events.add(3000, (context)=>{meetMonster(context.monster);}, null, {this: this, monster: monster});
@@ -350,7 +350,7 @@ var Yoda = function (game) {};
       }
       game.add.sprite(0, 0, 'planet_bg');
       audioPlayer = createAudioPlayer(['bgm', 'gamestart', 'gameover', 'monsterhit', 'step', 'meteor', 'ufo']);
-      
+
       function init() {
         var menuSprs = [];
         function createMenuItem(menuItem) {
