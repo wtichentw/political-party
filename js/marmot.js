@@ -114,7 +114,7 @@ var Marmot = function (game) {};
 
       game.world.bringToTop(toolsLayer);
       console.log(monsterEmptyPos);
-      
+
     }
   }
 
@@ -172,17 +172,17 @@ var Marmot = function (game) {};
 
   function gameIntroInit() {
     isIntro = true;
+    bgm.play();
+
     explainIndex = 1;
     explainCur = game.add.image(0, 0, "explain"+explainIndex);
     explainCur.inputEnabled = true;
-
     explainCur.events.onInputDown.add(explainListener, this);
     //explainCur.inputEnabled = true;
   }
 
   function gamePlayInit() {
     isPlay = true;
-    bgm.play();
     gameTimer.add(GAME_TIME, function(){ currentState = "gameOver";}, this);
     gameTimer.start();
     game.time.events.loop(MONSTER_SPAWN_TIME, rndSpawnMonster, this);
@@ -276,7 +276,8 @@ var Marmot = function (game) {};
         game.state.start("Marmot");
         break;
       case 2:
-        location.href = "https://theinitium.com/article/20150806-dailynews-tw-1/";
+        var win = window.open("https://theinitium.com/article/20150806-dailynews-tw-1/", '_blank');
+        //win.focus();
         break;
       case 3:
         alert("lazy policy");
