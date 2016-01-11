@@ -16,6 +16,8 @@ var StageOver = function(game) {
   var knowMoreBtn;
   var againBtn;
   var policyBtn;
+  var fbBtn;
+
   function btnOnClick(button) {
     switch (button.ID) {
       case 2:
@@ -26,6 +28,15 @@ var StageOver = function(game) {
         break;
       case 3:
         window.open(policyUrl, "_blank");
+        break;
+      case 4:
+        FB.ui({
+          method: "share",
+          href: "https://politicalparty.tw",
+          title: '期末考前絕對不能點開的小遊戲',
+          picture: 'http://politicalparty.tw/media/fb_share.jpg',
+          description: '有些人喜歡，有些人不喜歡，因為他有一種政治味'
+        });
         break;
     }
   }
@@ -45,6 +56,7 @@ var StageOver = function(game) {
     preload: function() {
       this.game.load.image('logoImagePath', logoImagePath);
       this.game.load.image("backToMainMenu", "./media/ending/back_to_main_menu.png");
+      this.game.load.image('fbBtn', "./media/fb_icon.png");
       this.game.load.spritesheet("knowMoreBtn", "./media/ending/know_more_btn.png", btnWidth, btnHeight);
       this.game.load.spritesheet("againBtn", "./media/ending/again_btn.png", btnWidth, btnHeight);
       this.game.load.spritesheet("policyBtn", "./media/ending/policy_btn.png", btnWidth, btnHeight);
@@ -118,6 +130,17 @@ var StageOver = function(game) {
       policyBtn.anchor.set(0.5);
       policyBtn.scale.set(0.5);
       policyBtn.ID = 3;
+
+      fbBtn = this.game.add.image(
+        50,
+        this.game.height-50,
+        "fbBtn"
+      );
+      fbBtn.anchor.setTo(0.0, 1.0);
+      fbBtn.scale.setTo(0.5);
+      fbBtn.inputEnabled = true;
+      fbBtn.ID = 4;
+      fbBtn.events.onInputDown.add(btnOnClick);
 
       var backToMainMenuImage = game.add.image(gameWidth, gameHeight, "backToMainMenu");
       backToMainMenuImage.anchor.set(1, 1);
