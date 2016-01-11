@@ -77,8 +77,16 @@ var SitTightGame = function(game) {
     },
     nextState: function() {
       ++this.currentStateIdx;
+    },
+    reset: function() {
+      this.currentStateIdx = 0;
+      for (var i = 0; i < this.states.length; ++i) {
+        this.states[i].isStarted = false;
+      }
     }
   };
+
+  var timer = {};
 
   var draw = {
     asset: {},
@@ -129,9 +137,10 @@ var SitTightGame = function(game) {
       return explanationLayer;
     },
     countDown: function() {
+      timer.countDown = game.time.create();
       var texts = ["3", "2", "1", "GO!"];
       for (var i = 0; i < 4; ++i) {
-        game.time.events.add(
+        timer.countDown.add(
           i * 1000,
           function(text) {
             var countDownText = game.add.text(
@@ -166,6 +175,7 @@ var SitTightGame = function(game) {
           texts[i]
         );
       }
+      timer.countDown.start();
     },
     keyboard: function(x, y, text) {
       var keyUpImage = game.add.image(x, y, this.asset.getAssetKey("key_up.png"));
@@ -338,7 +348,6 @@ var SitTightGame = function(game) {
       "Y": Phaser.KeyCode.Y,
       "Z": Phaser.KeyCode.Z
     },
-    timer: {},
     generateRandomKey: function() {
       var keysKeys = Object.keys(this.keys);
       var idx = game.rnd.between(0, keysKeys.length - 1);
@@ -374,6 +383,9 @@ var SitTightGame = function(game) {
     },
     updateText: function() {
       this.text.text = "Score: " + this.current;
+    },
+    reset: function() {
+      this.current = 0;
     }
   };
 
@@ -388,6 +400,9 @@ var SitTightGame = function(game) {
     },
 
     create: function() {
+
+      state.reset();
+      score.reset();
 
       layer = drawLayersInOrder(
         {
@@ -425,7 +440,10 @@ var SitTightGame = function(game) {
         var currentState = state.getCurrentState();
         switch (currentState.name) {
 
-          case "Explantion":
+          case "Explanation":
+            if (!currentState.isStarted) {
+              currentState.isStarted = true;
+            }
             break;
 
           case "CountDown":
@@ -439,14 +457,18 @@ var SitTightGame = function(game) {
 
             if (!currentState.isStarted) {
               currentState.isStarted = true;
-              keyboard.timer = game.time.events.loop(
+
+              timer.keyboards = game.time.create();
+              timer.keyboards.loop(
                 1000,
                 function() {
                   keyboard.generateRandomKey();
                 },
                 game
               );
-              game.time.events.loop(
+              timer.keyboards.start();
+              timer.murmur = game.time.create();
+              timer.murmur.loop(
                 5000,
                 function() {
                   var murmurTexts = constant.murmurTexts;
@@ -454,7 +476,9 @@ var SitTightGame = function(game) {
                 },
                 game
               );
-              game.time.events.add(
+              timer.murmur.start();
+              timer.grandma = game.time.create();
+              timer.grandma.add(
                 20000,
                 function() {
                   var warningText = draw.warning();
@@ -483,7 +507,8 @@ var SitTightGame = function(game) {
                       );
                       grandmaImageTween.onComplete.add(
                         function() {
-                          game.time.events.pause();
+                          timer.keyboards.pause();
+                          timer.murmur.pause();
                           state.isPaused = true;
                           audio.bgm.pause();
                           var grandmaVideoLayer = draw.grandmaVideo();
@@ -523,7 +548,8 @@ var SitTightGame = function(game) {
                                   pig.stand(100);
                                   audio.bgm.resume();
                                   state.isPaused = false;
-                                  game.time.events.resume();
+                                  timer.keyboards.resume();
+                                  timer.murmur.resume();
                                 },
                                 lightImage
                               );
@@ -540,6 +566,7 @@ var SitTightGame = function(game) {
                 this
               );
             }
+            timer.grandma.start();
 
             if (pig.body.y >= gameHeight) {
               pig.stand();
@@ -599,8 +626,20 @@ var SitTightGame = function(game) {
 
           case "GameOver":
             if (!currentState.isStarted) {
+              currentState.isStarted = true;
               game.sound.stopAll();
-              game.time.events.stop();
+              game.time.removeAll();
+
+              game.state.start(
+                "StageOver",
+                true,
+                false,
+                {
+                  logoImagePath: "../media/sit_tight/ending.jpg",
+                  score: score.current,
+                  againState: "SitTightGame"
+                }
+              );
             }
 
             break;
