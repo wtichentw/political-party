@@ -49,10 +49,15 @@ var StageOver = function(game) {
       this.game.load.spritesheet("knowMoreBtn", "./media/ending/know_more_btn.png", btnWidth, btnHeight);
       this.game.load.spritesheet("againBtn", "./media/ending/again_btn.png", btnWidth, btnHeight);
       this.game.load.spritesheet("policyBtn", "./media/ending/policy_btn.png", btnWidth, btnHeight);
-
+      this.game.load.audio('gameOverSound', './media/ending/game_over.mp3');
     },
 
     create: function() {
+
+      var gameOverSound;
+
+      gameOverSound = this.game.add.audio('gameOverSound', 1, false);
+      gameOverSound.play();
 
       this.stage.setBackgroundColor(0xFFFFFF);
 
