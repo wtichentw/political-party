@@ -348,6 +348,7 @@ var SitTightGame = function(game) {
       "Y": Phaser.KeyCode.Y,
       "Z": Phaser.KeyCode.Z
     },
+    frequency: 2,
     generateRandomKey: function() {
       var keysKeys = Object.keys(this.keys);
       var idx = game.rnd.between(0, keysKeys.length - 1);
@@ -371,6 +372,9 @@ var SitTightGame = function(game) {
         },
         this
       );
+    },
+    reset: function() {
+      this.frequency = 2;
     }
   };
 
@@ -403,6 +407,7 @@ var SitTightGame = function(game) {
 
       state.reset();
       score.reset();
+      keyboard.reset();
 
       layer = drawLayersInOrder(
         {
@@ -460,7 +465,7 @@ var SitTightGame = function(game) {
 
               timer.keyboards = game.time.create();
               timer.keyboards.loop(
-                500,
+                1000 / keyboard.frequency,
                 function() {
                   keyboard.generateRandomKey();
                 },
@@ -478,9 +483,10 @@ var SitTightGame = function(game) {
               );
               timer.murmur.start();
               timer.grandma = game.time.create();
-              timer.grandma.add(
+              timer.grandma.loop(
                 30000,
                 function() {
+                  timer.grandma.stop();
                   var warningText = draw.warning();
                   warningText.alpha = 0;
                   var warningTextTween = game.add.tween(warningText).to(
@@ -550,6 +556,17 @@ var SitTightGame = function(game) {
                                   state.isPaused = false;
                                   timer.keyboards.resume();
                                   timer.murmur.resume();
+                                  timer.grandma.start();
+                                  timer.keyboards.stop();
+                                  timer.keyboards.removeAll();
+                                  timer.keyboards.loop(
+                                    1000 / ++keyboard.frequency,
+                                    function() {
+                                      keyboard.generateRandomKey();
+                                    },
+                                    game
+                                  );
+                                  timer.keyboards.start();
                                 },
                                 lightImage
                               );
@@ -600,7 +617,7 @@ var SitTightGame = function(game) {
                 if (game.input.keyboard.isDown(keyboard.keys[childText.text])) {
                   audio.hit.play();
                   score.add();
-                  if (pig.body.y < gameHeight + pig.body.height - 350) {
+                  if (pig.body.y < gameHeight + pig.body.height - 250) {
                     pig.sit();
                   }
                   child.fallSpeed = 0;
