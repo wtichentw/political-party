@@ -460,7 +460,7 @@ var SitTightGame = function(game) {
 
               timer.keyboards = game.time.create();
               timer.keyboards.loop(
-                1000,
+                500,
                 function() {
                   keyboard.generateRandomKey();
                 },
@@ -479,7 +479,7 @@ var SitTightGame = function(game) {
               timer.murmur.start();
               timer.grandma = game.time.create();
               timer.grandma.add(
-                20000,
+                30000,
                 function() {
                   var warningText = draw.warning();
                   warningText.alpha = 0;
@@ -545,7 +545,7 @@ var SitTightGame = function(game) {
                               lightImageTween.onComplete.add(
                                 function() {
                                   this.destroy();
-                                  pig.stand(100);
+                                  pig.stand(150);
                                   audio.bgm.resume();
                                   state.isPaused = false;
                                   timer.keyboards.resume();
@@ -582,7 +582,7 @@ var SitTightGame = function(game) {
                 var childText = child.getChildAt(1);
                 if (childImage.y + 35 >= gameHeight) {
                   audio.explosion.play();
-                  pig.stand(5);
+                  pig.stand(10);
                   var explosionImage = draw.explosion(childImage.x);
                   game.add.tween(explosionImage).to(
                     {
@@ -600,7 +600,9 @@ var SitTightGame = function(game) {
                 if (game.input.keyboard.isDown(keyboard.keys[childText.text])) {
                   audio.hit.play();
                   score.add();
-                  pig.sit();
+                  if (pig.body.y < gameHeight + pig.body.height - 350) {
+                    pig.sit();
+                  }
                   child.fallSpeed = 0;
                   child.alive = false;
                   var childTween = game.add.tween(child).to(
