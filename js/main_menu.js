@@ -160,7 +160,13 @@ var MainMenu = function(game) {};
             titleText: "第二話｜絕地女士",
             subtitleText: "小英的真實身份居然是…",
             nextState: {
-              key: "Yoda"
+              key: "IntroVideo",
+              args: {
+                videoPath: "media/yoda/intro.webm",
+                nextState: {
+                  key: "Yoda"
+                }
+              }
             }
           }
         );
