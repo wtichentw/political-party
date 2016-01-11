@@ -16,6 +16,7 @@ var Yoda = function (game) {};
 
   const DIRECTION = { NONE: 0, LEFT: 1, RIGHT: 2, UP: 3, BOTTOM: 4 };
 
+
   var isCountDown;
   var selectedCharacter;
   var characterMenu;
@@ -131,6 +132,7 @@ var Yoda = function (game) {};
         maskBg(x+MASK_WIDTH, y);
         maskBg(x-MASK_WIDTH, y);
         score = mapDirty.getProgress();
+        console.log(mapDirty.getProgress());
         updateScore();
         character.playStep();
       }
@@ -307,6 +309,7 @@ var Yoda = function (game) {};
 
   function gameOver() {
     isStart = false;
+    audioPlayer.get('bgm').stop();
     tsai.stop();
     game.time.events.remove(countDownEvent);
     game.time.events.remove(createMonsterEvent);
@@ -316,7 +319,7 @@ var Yoda = function (game) {};
       true,
       false,
       {
-        logoImagePath: "../media/yoda/ending.jpg",
+        logoImagePath: "./media/yoda/ending.jpg",
         score: score,
         againState: "Yoda"
       }
@@ -491,6 +494,7 @@ var Yoda = function (game) {};
 
       function preGameStart() {
         preGameCountDown();
+        remainTime = PLAY_TIME;
         var startAudio = audioPlayer.get('gamestart');
         startAudio.onStop.add(()=>{
           audioPlayer.get('bgm').loopFull();
