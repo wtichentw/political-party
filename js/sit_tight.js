@@ -635,9 +635,11 @@ var SitTightGame = function(game) {
                 true,
                 false,
                 {
-                  logoImagePath: "../media/sit_tight/ending.jpg",
+                  logoImagePath: "/media/sit_tight/ending.jpg",
                   score: score.current,
-                  againState: "SitTightGame"
+                  againState: "SitTightGame",
+                  knowMoreUrl: "http://www.storm.mg/article/76888",
+                  policyUrl: "https://www.facebook.com/media/set/?set=a.1690070997875035.1073741829.1683872658494869&type=3&__mref=message_bubble"
                 }
               );
             }
