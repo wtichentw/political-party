@@ -13,7 +13,7 @@ var Marmot = function (game) {};
   var againBtn, moreBtn, policyBtn, menuBtn, fbBtn;
   var againBtnPress, moreBtnPress, policyBtnPress;
   // ----- START GAME VARIABLE
-  var GAME_TIME = 1000;
+  var GAME_TIME = 60000;
   var MONSTER_SPAWN_TIME = 2500;
   var currentState;
   var bg, bgm, score, scoreText, timeText, gameTimer;
