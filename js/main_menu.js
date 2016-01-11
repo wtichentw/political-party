@@ -8,6 +8,7 @@ var MainMenu = function(game) {};
   var imageRose;
   var imageSon;
   var imageRealPig;
+  var imageFB;
 
   MainMenu.prototype = {
     preload: function() {
@@ -19,33 +20,56 @@ var MainMenu = function(game) {};
       game.load.image("mainMenuRose", "media/main_menu/rose.png");
       game.load.image("mainMenuRealPig", "media/main_menu/realpig.png");
       game.load.image("mainMenuSon", "media/main_menu/son.png");
+      game.load.image('mainMenuFBShare', "media/fb_icon.png");
     },
     create: function() {
       game.add.image(0, 0, "mainMenuBg");
 
+      imageFB = this.game.add.image(
+        50,
+        this.game.height-50,
+        "mainMenuFBShare"
+      );
+      imageFB.anchor.setTo(0.0, 1.0);
+      imageFB.scale.setTo(0.5);
+      imageFB.inputEnabled = true;
+      imageFB.events.onInputDown.add(function(){
+        FB.ui({
+          method: "share",
+          href: "https://politicalparty.tw",
+          title: '期末考前絕對不能點開的小遊戲',
+          picture: 'http://politicalparty.tw/media/fb_share.jpg',
+          description: '有些人喜歡，有些人不喜歡，因為他有一種政治味'
+        });
+      });
+
       imagePig = game.add.image(790, 240, "mainMenuPig");
       imagePig.scale.set(0.33);
-
-      imageHorse = game.add.image(510, 110, "mainMenuHorse");
-      imageHorse.scale.set(0.37);
+      //
+      // imageHorse = game.add.image(510, 110, "mainMenuHorse");
+      // imageHorse.scale.set(0.37);
 
       imageEng = game.add.image(220, 320, "mainMenuEng");
       imageEng.scale.set(0.33);
 
-      imageShi = game.add.image(1070, 520, "mainMenuShi");
-      imageShi.scale.set(0.33);
+      // imageShi = game.add.image(1070, 520, "mainMenuShi");
+      // imageShi.scale.set(0.33);
+      //
+      // imageRose = game.add.image(600, 100, "mainMenuRose");
+      // imageRose.scale.set(0.31);
 
-      imageRose = game.add.image(600, 100, "mainMenuRose");
-      imageRose.scale.set(0.31);
-
-      imageRealPig = game.add.image(40, 550, "mainMenuRealPig");
-      imageRealPig.scale.set(0.31);
+      // imageRealPig = game.add.image(40, 550, "mainMenuRealPig");
+      // imageRealPig.scale.set(0.31);
 
       imageSon = game.add.image(425, 445, "mainMenuSon");
       imageSon.scale.set(0.31);
 
       var images = [imagePig, imageHorse, imageEng, imageShi, imageRose, imageRealPig, imageSon];
+      var allow = [true, false, true, false, false, false, true];
       for (var i = 0; i < images.length; ++i) {
+        if (!allow[i]) {
+          continue;
+        }
         images[i].inputEnabled = true;
         images[i].events.onInputOver.add(function() {
           this.y -= 20;
@@ -90,35 +114,35 @@ var MainMenu = function(game) {};
           );
         }, images[2]);
 
-        images[3].events.onInputDown.add(function() {
-          this.game.state.start(
-            "StageIntro",
-            true,
-            false,
-            {
-              titleText: "第四話｜馬習會",
-              subtitleText: "我的一小握，是台灣的一大握",
-              nextState: {
-                key: "ShakeHandGame"
-              }
-            }
-          );
-        }, images[3]);
+        // images[3].events.onInputDown.add(function() {
+        //   this.game.state.start(
+        //     "StageIntro",
+        //     true,
+        //     false,
+        //     {
+        //       titleText: "第四話｜馬習會",
+        //       subtitleText: "我的一小握，是台灣的一大握",
+        //       nextState: {
+        //         key: "ShakeHandGame"
+        //       }
+        //     }
+        //   );
+        // }, images[3]);
 
-        images[5].events.onInputDown.add(function() {
-          this.game.state.start(
-            "StageIntro",
-            true,
-            false,
-            {
-              titleText: "第?話｜????",
-              subtitleText: "??????",
-              nextState: {
-                key: "FlappyPig"
-              }
-            }
-          );
-        }, images[5]);
+        // images[5].events.onInputDown.add(function() {
+        //   this.game.state.start(
+        //     "StageIntro",
+        //     true,
+        //     false,
+        //     {
+        //       titleText: "第?話｜????",
+        //       subtitleText: "??????",
+        //       nextState: {
+        //         key: "FlappyPig"
+        //       }
+        //     }
+        //   );
+        // }, images[5]);
 
         images[6].events.onInputDown.add(function() {
           this.game.state.start(
