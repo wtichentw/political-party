@@ -309,7 +309,7 @@ var SitTightGame = function(game) {
   var pig = {
     body: {},
     standSpeed: 0.1,
-    sitSpeed: 10,
+    sitSpeed: 3,
     sit: function() {
       this.body.y += this.sitSpeed;
     },
