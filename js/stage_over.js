@@ -44,21 +44,26 @@ var StageOver = function(game) {
 
     preload: function() {
 
-      this.game.load.image(logoImagePath, logoImagePath);
+      this.game.load.image('logoImagePath', logoImagePath);
       this.game.load.image("backToMainMenu", "./media/ending/back_to_main_menu.png");
       this.game.load.spritesheet("knowMoreBtn", "./media/ending/know_more_btn.png", btnWidth, btnHeight);
       this.game.load.spritesheet("againBtn", "./media/ending/again_btn.png", btnWidth, btnHeight);
       this.game.load.spritesheet("policyBtn", "./media/ending/policy_btn.png", btnWidth, btnHeight);
-
+      this.game.load.audio('gameOverSound', './media/ending/game_over.mp3');
     },
 
     create: function() {
 
+      var gameOverSound;
+
+      gameOverSound = this.game.add.audio('gameOverSound', 1, false);
+      gameOverSound.play();
+
       this.stage.setBackgroundColor(0xFFFFFF);
 
-      this.game.add.image(0, 0, logoImagePath);
+      this.game.add.image(0, 0, 'logoImagePath');
       this.game.add.text(
-        gameWidth / 2 + 250,
+        gameWidth / 2 + 300,
         275,
         score + "分",
         {

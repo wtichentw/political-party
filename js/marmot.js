@@ -376,15 +376,7 @@ var Marmot = function (game) {};
       game.load.image("leafWrong", "media/marmot/Wrong-Leaf.png");
       game.load.image("marmot", "media/marmot/Mouse.png");
       game.load.image("marmotAngry", "media/marmot/Angry-Mouse.png");
-      // ----- Result
-      game.load.image("resultLogo", "media/marmot/son_result.png");
-      game.load.image("again", "media/ending/Again.png");
-      game.load.image("againPress", "media/ending/Again_press.png");
-      game.load.image("more", "media/ending/Know_more.png");
-      game.load.image("morePress", "media/ending/Know_more_press.png");
-      game.load.image("policy", "media/ending/Politic_strategy.png");
-      game.load.image("policyPress", "media/ending/Politic_strategy_press.png");
-      game.load.image("menu", "media/ending/Back_to_park.png");
+
       // ----- audio
       game.load.audio("bgm", "media/marmot/son_bgm.mp3");
       game.load.audio("dirtSound", "media/marmot/dirt.mp3");
@@ -450,7 +442,7 @@ var Marmot = function (game) {};
           gamePlayUpdate();
           break;
         case "gameOver":
-          if (!isOver) gameOverInit();
+          //if (!isOver) gameOverInit();
           break;
         default:
       }
