@@ -16,16 +16,15 @@ var StageOver = function(game) {
   var knowMoreBtn;
   var againBtn;
   var policyBtn;
-  function btnOnClick() {
-    switch (this) {
-      case knowMoreBtn:
+  function btnOnClick(button) {
+    switch (button.ID) {
+      case 2:
         window.open(knowMoreUrl, "_blank");
         break;
-      case againBtn:
-        alert('again');
+      case 1:
         game.state.start(againState);
         break;
-      case policyBtn:
+      case 3:
         window.open(policyUrl, "_blank");
         break;
     }
@@ -34,7 +33,7 @@ var StageOver = function(game) {
   StageOver.prototype = {
 
     init: function(args) {
-      alert('init');
+      this.game.world.removeAll();
       logoImagePath = args.logoImagePath;
       score = args.score;
       againState = args.againState;
@@ -44,7 +43,6 @@ var StageOver = function(game) {
     },
 
     preload: function() {
-      alert('preload');
       this.game.load.image('logoImagePath', logoImagePath);
       this.game.load.image("backToMainMenu", "./media/ending/back_to_main_menu.png");
       this.game.load.spritesheet("knowMoreBtn", "./media/ending/know_more_btn.png", btnWidth, btnHeight);
@@ -54,7 +52,6 @@ var StageOver = function(game) {
     },
 
     create: function() {
-      alert('create');
 
       var gameOverSound;
 
@@ -90,6 +87,7 @@ var StageOver = function(game) {
       );
       knowMoreBtn.anchor.set(0.5);
       knowMoreBtn.scale.set(0.5);
+      knowMoreBtn.ID = 2;
 
       againBtn = this.game.add.button(
         knowMoreBtnX - btnWidth / 2 - 100,
@@ -104,6 +102,7 @@ var StageOver = function(game) {
       );
       againBtn.anchor.set(0.5);
       againBtn.scale.set(0.5);
+      againBtn.ID = 1;
 
       policyBtn = this.game.add.button(
         knowMoreBtnX + btnWidth / 2 + 100,
@@ -118,6 +117,7 @@ var StageOver = function(game) {
       );
       policyBtn.anchor.set(0.5);
       policyBtn.scale.set(0.5);
+      policyBtn.ID = 3;
 
       var backToMainMenuImage = game.add.image(gameWidth, gameHeight, "backToMainMenu");
       backToMainMenuImage.anchor.set(1, 1);
