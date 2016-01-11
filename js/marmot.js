@@ -3,7 +3,7 @@ var Marmot = function (game) {};
 (function () {
   "use strict";
   // ----- AUDIO
-  var dirtSound, toolSound, waterSound, gameOverSound, wrongSound, startSound;
+  var dirtSound, toolSound, waterSound, wrongSound, startSound;
   // ----- STATE
   var isIntro = false, isPlay = false, isOver = false;
   // ----- START EXPLAIN VAR
@@ -13,7 +13,7 @@ var Marmot = function (game) {};
   var againBtn, moreBtn, policyBtn, menuBtn, fbBtn;
   var againBtnPress, moreBtnPress, policyBtnPress;
   // ----- START GAME VARIABLE
-  var GAME_TIME = 1000;
+  var GAME_TIME = 1*1000;
   var MONSTER_SPAWN_TIME = 2500;
   var currentState;
   var bg, bgm, score, scoreText, timeText, gameTimer;
@@ -185,7 +185,6 @@ var Marmot = function (game) {};
     isPlay = true;
     gameTimer.add(GAME_TIME, function(){
       bgm.stop();
-      gameOverSound.play();
       game.state.start(
         "StageOver",
         true,
@@ -205,7 +204,6 @@ var Marmot = function (game) {};
 
   function gameOverInit() {
     isOver = true;
-    gameOverSound.play();
     //alert("Game\"s over");
     // ----- Clean up and change state
     game.world.removeAll();
@@ -380,7 +378,6 @@ var Marmot = function (game) {};
       // ----- audio
       game.load.audio("bgm", "media/marmot/son_bgm.mp3");
       game.load.audio("dirtSound", "media/marmot/dirt.mp3");
-      game.load.audio("gameOverSound", "media/marmot/game_over.mp3");
       game.load.audio("toolSound", "media/marmot/tool.mp3");
       game.load.audio("waterSound", "media/marmot/water.mp3");
       game.load.audio("wrongSound", "media/marmot/wrong.mp3");
@@ -396,7 +393,6 @@ var Marmot = function (game) {};
       waterSound = game.add.audio("waterSound", 3, false);
       wrongSound = game.add.audio("wrongSound", 3, false);
       toolSound = game.add.audio("toolSound", 3, false);
-      gameOverSound = game.add.audio("gameOverSound", 3, false);
       startSound = game.add.audio("startSound", 3, false);
 
       // ----- Timer
