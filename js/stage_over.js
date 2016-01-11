@@ -19,11 +19,13 @@ var StageOver = function(game) {
   function btnOnClick() {
     switch (this) {
       case knowMoreBtn:
+        window.open(knowMoreUrl, "_blank");
         break;
       case againBtn:
         game.state.start(againState);
         break;
       case policyBtn:
+        window.open(policyUrl, "_blank");
         break;
     }
   }
