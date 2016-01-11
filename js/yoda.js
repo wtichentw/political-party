@@ -311,7 +311,16 @@ var Yoda = function (game) {};
     game.time.events.remove(countDownEvent);
     game.time.events.remove(createMonsterEvent);
     audioPlayer.get('gameover').play();
-    //TODO get score here: 'score'
+    game.state.start(
+      "StageOver",
+      true,
+      false,
+      {
+        logoImagePath: "../media/yoda/ending.jpg",
+        score: score,
+        againState: "Yoda"
+      }
+    );
   }
 
   function maskBg(x, y) {
