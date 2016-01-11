@@ -80,12 +80,13 @@ var MainMenu = function(game) {};
       imageSon = game.add.image(625, 495, "mainMenuSon");
       imageSon.scale.set(0.31);
 
-      objLayer.add(imagePig);
-      objLayer.add(imageEng);
-      objLayer.add(imageSon);
+
       objLayer.add(imageFB);
       objLayer.add(imageLazy);
       objLayer.add(imageCredit);
+      objLayer.add(imagePig);
+      objLayer.add(imageEng);
+      objLayer.add(imageSon);
 
       var images = [imagePig, imageHorse, imageEng, imageShi, imageRose, imageRealPig, imageSon, imageLazy, imageCredit];
       var allow = [true, false, true, false, false, false, true, true, true];
