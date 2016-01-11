@@ -44,7 +44,7 @@ var StageOver = function(game) {
 
     preload: function() {
 
-      this.game.load.image(logoImagePath, logoImagePath);
+      this.game.load.image('logoImagePath', logoImagePath);
       this.game.load.image("backToMainMenu", "./media/ending/back_to_main_menu.png");
       this.game.load.spritesheet("knowMoreBtn", "./media/ending/know_more_btn.png", btnWidth, btnHeight);
       this.game.load.spritesheet("againBtn", "./media/ending/again_btn.png", btnWidth, btnHeight);
@@ -56,7 +56,7 @@ var StageOver = function(game) {
 
       this.stage.setBackgroundColor(0xFFFFFF);
 
-      this.game.add.image(0, 0, logoImagePath);
+      this.game.add.image(0, 0, 'logoImagePath');
       this.game.add.text(
         gameWidth / 2 + 250,
         275,
