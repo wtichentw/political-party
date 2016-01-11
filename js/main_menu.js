@@ -16,7 +16,7 @@ var MainMenu = function(game) {};
   var imageTeamLayer;
   var objLayer;
 
-  const lazyURL = 'https://www.facebook.com/1683872658494869/photos/a.1690070997875035.1073741829.1683872658494869/1690071014541700/?type=3&theater';
+  const lazyURL = 'https://www.facebook.com/media/set/?set=a.1690070997875035.1073741829.1683872658494869&type=3&__mref=message_bubble';
 
   MainMenu.prototype = {
     preload: function() {
