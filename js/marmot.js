@@ -183,7 +183,19 @@ var Marmot = function (game) {};
 
   function gamePlayInit() {
     isPlay = true;
-    gameTimer.add(GAME_TIME, function(){ currentState = "gameOver";}, this);
+    gameTimer.add(GAME_TIME, function(){
+      game.state.start(
+        "StageOver",
+        true,
+        false,
+        {
+          logoImagePath: "../media/marmot/ending.png",
+          score: score,
+          againState: "Marmot",
+          knowMoreUrl: "https://theinitium.com/article/20150806-dailynews-tw-1/"
+        }
+      );
+    }, this);
     gameTimer.start();
     game.time.events.loop(MONSTER_SPAWN_TIME, rndSpawnMonster, this);
   }
