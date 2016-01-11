@@ -58,7 +58,7 @@ var StageOver = function(game) {
 
       this.game.add.image(0, 0, 'logoImagePath');
       this.game.add.text(
-        gameWidth / 2 + 250,
+        gameWidth / 2 + 300,
         275,
         score + "分",
         {
