@@ -9,12 +9,17 @@ var Yoda = function (game) {};
   const LeftKey = Phaser.Keyboard.LEFT;
   const RightKey = Phaser.Keyboard.RIGHT;
   const Velocity = 200;
-  const VELOCITY_PARAM = 1.2;
+  const VELOCITY_PARAM = 1.8;
   const MASK_WIDTH = 32, MASK_HEIGHT = 32;
   const BG_OFFSET_X = 0, BG_OFFSET_Y = 0.15;
+  const SPAWN_MONSTER_TIME = 1600;
 
+  const DIRECTION = { NONE: 0, LEFT: 1, RIGHT: 2, UP: 3, BOTTOM: 4 };
+
+  var isCountDown;
   var selectedCharacter;
   var characterMenu;
+  var expPics = ['explain3', 'explain2', 'explain1'];
   var monsters = {};
   var monsterIndex = 0;
   var monsterType = ['ufo', 'et', 'meteor'];
@@ -26,11 +31,11 @@ var Yoda = function (game) {};
   ];
   var isStart = false;
   var tsai;
-  var moveEvent;
   var mapDirty;
-  var remainTime = 60, score;
+  var remainTime = PLAY_TIME, score;
   var remainTimeText, scoreText;
   var selectedCharacter;
+  var countDownEvent, createMonsterEvent;
 
   var fontStyle = {font: 'bold 44px Arial', fill: '#fff', boundsAlignH: 'left', boundsAlignV: 'middle'};
 
@@ -53,63 +58,93 @@ var Yoda = function (game) {};
     var character = {};
     var stepAudio = audioPlayer.get('step');
     character.spr = game.add.sprite(game.width*0.2, game.height*0.2, name);
+    character.spr.anchor.setTo(.5, .5);
     character.spr.animations.add('left', [1], 1, false);
     character.spr.animations.add('right', [0], 1, false);
     game.physics.enable(character.spr, Phaser.Physics.ARCADE);
     character.spr.body.collideWorldBounds = true;
     character.spr.body.immovable = true;
+    character.moveDirH = DIRECTION.NONE;
+    character.moveDirV = DIRECTION.NONE;
     character.velocity = Velocity;
+    character.isMoving = function() {
+      return character.moveDirH != DIRECTION.NONE || character.moveDirV != DIRECTION.NONE;
+    };
     character.playStep = function() {
       if(!stepAudio.isPlaying)
         stepAudio.loopFull();
     }
     character.moveLeft = function() {
-      character.isMoving = true;
+      if(character.moveDirH == DIRECTION.LEFT)
+        return;
+      character.moveDirH = DIRECTION.LEFT;
       character.turnLeft();
       character.spr.body.velocity.setTo(-character.velocity, character.spr.body.velocity.y);
-      character.playStep();
     };
     character.moveRight = function() {
-      character.isMoving = true;
+      if(character.moveDirH == DIRECTION.RIGHT)
+        return;
+      character.moveDirH = DIRECTION.RIGHT;
       character.turnRight();
       character.spr.body.velocity.setTo(character.velocity, character.spr.body.velocity.y);
-      character.playStep();
     };
     character.moveUp = function() {
-      character.isMoving = true;
+      if(character.moveDirV == DIRECTION.UP)
+        return;
+      character.moveDirV = DIRECTION.UP;
       character.spr.body.velocity.setTo(character.spr.body.velocity.x, -character.velocity);
-      character.playStep();
     };
     character.moveBottom = function() {
-      character.isMoving = true;
+      if(character.moveDirV == DIRECTION.BOTTOM)
+        return;
+      character.moveDirV = DIRECTION.BOTTOM;
       character.spr.body.velocity.setTo(character.spr.body.velocity.x, character.velocity);
-      character.playStep();
     };
     character.stop = function() {
-      character.isMoving = false;
+      character.moveDirH = DIRECTION.NONE;
+      character.moveDirV = DIRECTION.NONE;
       character.spr.body.velocity.setTo(0, 0);
       stepAudio.stop();
     };
+    character.stopH = function() {
+      character.moveDirH = DIRECTION.NONE;
+      character.spr.body.velocity.setTo(0, character.spr.body.velocity.y);
+      if(!character.isMoving())
+        stepAudio.stop();
+    };
+    character.stopV = function() {
+      character.moveDirV = DIRECTION.NONE;
+      character.spr.body.velocity.setTo(character.spr.body.velocity.x, 0);
+      if(!character.isMoving())
+        stepAudio.stop();
+    };
     character.mudFloor = function() {
       var spr = character.spr;
-      var dirtyKey = mapDirty.calculateDirtyKey(spr);
-      var x = spr.x-spr.width*2.2;
-      var y = spr.y-spr.height/2;
-
-      mapDirty.setMapDirty(dirtyKey.x, dirtyKey.y);
-
-      maskBg(x, y);
-      score = mapDirty.getProgress();
-      updateScore();
+      var dirtyKey = mapDirty.calculateDirtyKey(character);
+      var offsetX = character.faceDir == DIRECTION.LEFT?-MASK_WIDTH:0;
+      if(mapDirty.changeBackground(dirtyKey.x, dirtyKey.y)) {
+        var x = spr.body.x-bgPos.x+spr.width/2+offsetX;
+        var y = spr.body.y-bgPos.y+spr.height;
+        x = parseInt(Math.round(x/MASK_WIDTH))*MASK_WIDTH;
+        y = parseInt(Math.round(y/MASK_HEIGHT))*MASK_HEIGHT;
+        maskBg(x, y);
+        maskBg(x+MASK_WIDTH, y);
+        maskBg(x-MASK_WIDTH, y);
+        score = mapDirty.getProgress();
+        updateScore();
+        character.playStep();
+      }
     };
     character.turnLeft = function() {
       character.spr.animations.play('left');
+      character.faceDir = DIRECTION.LEFT;
     };
     character.turnRight = function() {
       character.spr.animations.play('right');
+      character.faceDir = DIRECTION.RIGHT;
     };
     character.update = function() {
-      if(character.isMoving)
+      if(character.isMoving())
         character.mudFloor();
     };
 
@@ -131,19 +166,24 @@ var Yoda = function (game) {};
     var mapDirtyMgr = {
       mapDirty: mapDirty
     };
-    mapDirtyMgr.calculateDirtyKey = function(characterSpr) {
-      var x = characterSpr.x - bgPos.x;
-      var y = characterSpr.y+characterSpr.height-bgPos.y;
-      console.log(x, y);
+    mapDirtyMgr.calculateDirtyKey = function(character) {
+      var charSpr = character.spr;
+      var offsetX = 0;
+      var offsetY = charSpr.height/2;
+      var x = charSpr.x - bgPos.x + offsetX;
+      var y = charSpr.y - bgPos.y + offsetY;
       var dirtyX = parseInt(Math.round(x/MASK_WIDTH));
       var dirtyY = parseInt(Math.round(y/MASK_HEIGHT));
       return { x: dirtyX, y: dirtyY };
     }
-    mapDirtyMgr.setMapDirty = function(x, y) {
+    mapDirtyMgr.changeBackground = function(x, y) {
       var dirtyKey = x+';'+y;
       if(dirtyKey in this.mapDirty) {
+        var origin = this.mapDirty[dirtyKey];
         this.mapDirty[dirtyKey] = 1;
+        return !origin;
       }
+      return false;
     };
     mapDirtyMgr.getProgress = function() {
       var count = 0;
@@ -200,7 +240,8 @@ var Yoda = function (game) {};
 
   function meetMonster(monster) {
     destroyMonster(monster);
-    remainTime -= 1;
+    if(remainTime > 0)
+      remainTime--;
     updateRemainTime();
   }
 
@@ -235,7 +276,7 @@ var Yoda = function (game) {};
   function onMonsterAttack(monster) {
     console.log('attack by monster: '+monster.id+'!');
     destroyMonster(monster);
-    audioPlayer.get('monsterhit').play();
+    audioPlayer.get('Ahhh2').play();
   }
 
   function checkMonsterCollision () {
@@ -256,7 +297,8 @@ var Yoda = function (game) {};
   }
 
   function countDown() {
-    remainTime--;
+    if(remainTime > 0)
+      remainTime--;
     updateRemainTime();
     if(remainTime <= 0) {
       gameOver();
@@ -264,11 +306,16 @@ var Yoda = function (game) {};
   }
 
   function gameOver() {
+    isStart = false;
+    tsai.stop();
+    game.time.events.remove(countDownEvent);
+    game.time.events.remove(createMonsterEvent);
     audioPlayer.get('gameover').play();
+    //TODO get score here: 'score'
   }
 
   function maskBg(x, y) {
-    if(x >= 0 && y >= 0 && x < bgPos.x && y < bgPos.y) {
+    if(x >= -MASK_WIDTH/2 && y >= -MASK_HEIGHT/2 && x <= bgPos.x+fBg.width+MASK_WIDTH/2 && y <= bgPos.y+fBg.height+MASK_HEIGHT/2) {
       var mask = game.make.bitmapData(MASK_WIDTH+x, MASK_HEIGHT+y);
       var maskRect = new Phaser.Rectangle(x, y, MASK_WIDTH, MASK_HEIGHT);
       mask.copyRect(fBg, maskRect, x, y);
@@ -294,7 +341,7 @@ var Yoda = function (game) {};
       game.load.audio('bgm', ['media/yoda/yoda_bgm.wav']);
       game.load.audio('gamestart', ['media/yoda/gamestart.mp3']);
       game.load.audio('gameover', ['media/yoda/gameover.wav']);
-      game.load.audio('monsterhit', ['media/yoda/monsterhit.wav']);
+      game.load.audio('Ahhh2', ['media/yoda/Ahhh2.wav']);
       game.load.audio('step', ['media/yoda/step.wav']);
       game.load.audio('meteor', ['media/yoda/meteor.wav']);
       game.load.audio('ufo', ['media/yoda/ufo.wav']);
@@ -304,6 +351,9 @@ var Yoda = function (game) {};
       game.load.image('et', 'media/yoda/et.png');
       game.load.image('meteor', 'media/yoda/meteor.png');
 
+      game.load.image('explain1', 'media/yoda/explain1.jpg');
+      game.load.image('explain2', 'media/yoda/explain2.jpg');
+      game.load.image('explain3', 'media/yoda/explain3.jpg');
     },
     create: function() {
       characterMenu = {
@@ -349,7 +399,63 @@ var Yoda = function (game) {};
         }
       }
       game.add.sprite(0, 0, 'planet_bg');
-      audioPlayer = createAudioPlayer(['bgm', 'gamestart', 'gameover', 'monsterhit', 'step', 'meteor', 'ufo']);
+      audioPlayer = createAudioPlayer(['bgm', 'gamestart', 'gameover', 'Ahhh2', 'step', 'meteor', 'ufo']);
+
+      function preInitIntro() {
+        var expTmp;
+
+        for (var i = 0; i < expPics.length; i++) {
+          expTmp = game.add.image(0, 0, expPics[i]);
+          expTmp.inputEnabled = true;
+          expTmp.picID = i;
+          expTmp.events.onInputDown.add(function () {
+            this.visible = false;
+            this.destroy();
+            if (this.picID === 0) {
+              init();
+            }
+          }, expTmp);
+        }
+      }
+
+      function preGameCountDown() {
+        var texts = ["3", "2", "1", "GO!"];
+        for (var i = 0; i < 4; ++i) {
+          game.time.events.add(
+            i * 1000,
+            function(text) {
+              var countDownText = game.add.text(
+                gameWidth / 2,
+                gameHeight / 2,
+                text,
+                {
+                  font: "100px Arial",
+                  fill: "#FF0000"
+                }
+              );
+              countDownText.anchor.set(0.5);
+              var countDownTextTween = game.add.tween(countDownText).to(
+                {
+                  alpha: 0
+                },
+                1000,
+                "Linear",
+                true
+              );
+              if (text === "GO!") {
+                countDownTextTween.onComplete.add(
+                  function() {
+
+                  },
+                  game
+                );
+              }
+            },
+            game,
+            texts[i]
+          );
+        }
+      }
 
       function init() {
         var menuSprs = [];
@@ -375,6 +481,7 @@ var Yoda = function (game) {};
       }
 
       function preGameStart() {
+        preGameCountDown();
         var startAudio = audioPlayer.get('gamestart');
         startAudio.onStop.add(()=>{
           audioPlayer.get('bgm').loopFull();
@@ -411,9 +518,9 @@ var Yoda = function (game) {};
         remainTimeText = game.add.text(game.width-200, 100, TEXT_TIME, fontStyle);
         scoreText = game.add.text(game.width-200, 150, TEXT_SCORE, fontStyle);
 
-        game.time.events.repeat(Phaser.Timer.SECOND, PLAY_TIME, countDown, this);
+        countDownEvent = game.time.events.repeat(Phaser.Timer.SECOND, PLAY_TIME, countDown, this);
 
-        var keyUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+        /*var keyUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
         keyUp.onDown.add(()=>{tsai.moveUp();}, this);
         keyUp.onUp.add(()=>{tsai.stop();}, this);
 
@@ -427,15 +534,39 @@ var Yoda = function (game) {};
 
         var keyRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
         keyRight.onDown.add(()=>{tsai.moveRight();}, this);
-        keyRight.onUp.add(()=>{tsai.stop();}, this);
+        keyRight.onUp.add(()=>{tsai.stop();}, this);*/
 
         // ----- create
-        game.time.events.loop(3000, createMonster, this);
+        createMonsterEvent = game.time.events.loop(SPAWN_MONSTER_TIME, createMonster, this);
       }
-      init();
+      preInitIntro();
+      //init();
     },
     update: function() {
       if(isStart) {
+        var isMovingH = false, isMovingV = false;
+        if(game.input.keyboard.isDown(Phaser.Keyboard.UP)) {
+          tsai.moveUp();
+          isMovingV = true;
+        }
+        else if(game.input.keyboard.isDown(Phaser.Keyboard.DOWN)) {
+          tsai.moveBottom();
+          isMovingV = true;
+        }
+        else if(!isMovingV)
+          tsai.stopV();
+        if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
+          tsai.moveLeft();
+          isMovingH = true;
+        }
+        else if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
+          tsai.moveRight();
+          isMovingH = true;
+        }
+        else if(!isMovingH)
+          tsai.stopH();
+        /*else
+        tsai.stop();*/
         tsai.update();
         checkMonsterCollision();
       }
