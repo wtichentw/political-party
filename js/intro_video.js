@@ -35,14 +35,15 @@ var IntroVideo = function(game) {};
       }, introVideo);
 
       var skipText = game.add.text(
-        game.width - 50,
-        game.height - 30,
+        game.width,
+        game.height,
         "Skip",
         {
-          font: "16px Arial",
+          font: "25px Arial",
           fill: "#868988"
         }
       );
+      skipText.anchor.set(1, 1);
       skipText.inputEnabled = true;
       skipText.events.onInputDown.add(function() {
         introVideo.stop();

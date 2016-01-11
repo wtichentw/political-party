@@ -321,7 +321,9 @@ var Yoda = function (game) {};
       {
         logoImagePath: "./media/yoda/ending.jpg",
         score: score,
-        againState: "Yoda"
+        againState: "Yoda",
+        knowMoreUrl: "http://www.thenewslens.com/post/178633/",
+        policyUrl: "https://www.facebook.com/media/set/?set=a.1690070997875035.1073741829.1683872658494869&type=3&__mref=message_bubble"
       }
     );
   }

@@ -13,7 +13,7 @@ var Marmot = function (game) {};
   var againBtn, moreBtn, policyBtn, menuBtn, fbBtn;
   var againBtnPress, moreBtnPress, policyBtnPress;
   // ----- START GAME VARIABLE
-  var GAME_TIME = 1*1000;
+  var GAME_TIME = 60*1000;
   var MONSTER_SPAWN_TIME = 2500;
   var currentState;
   var bg, bgm, score, scoreText, timeText, gameTimer;
@@ -193,7 +193,8 @@ var Marmot = function (game) {};
           logoImagePath: "./media/marmot/ending.png",
           score: score,
           againState: "Marmot",
-          knowMoreUrl: "https://theinitium.com/article/20150806-dailynews-tw-1/"
+          knowMoreUrl: "https://theinitium.com/article/20150806-dailynews-tw-1/",
+          policyUrl: "https://www.facebook.com/media/set/?set=a.1690070997875035.1073741829.1683872658494869&type=3&__mref=message_bubble"
         }
       );
     }, this);
