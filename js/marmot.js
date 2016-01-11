@@ -184,12 +184,14 @@ var Marmot = function (game) {};
   function gamePlayInit() {
     isPlay = true;
     gameTimer.add(GAME_TIME, function(){
+      bgm.stop();
+      gameOverSound.play();
       game.state.start(
         "StageOver",
         true,
         false,
         {
-          logoImagePath: "../media/marmot/ending.png",
+          logoImagePath: "./media/marmot/ending.png",
           score: score,
           againState: "Marmot",
           knowMoreUrl: "https://theinitium.com/article/20150806-dailynews-tw-1/"
@@ -203,7 +205,6 @@ var Marmot = function (game) {};
 
   function gameOverInit() {
     isOver = true;
-    bgm.stop();
     gameOverSound.play();
     //alert("Game\"s over");
     // ----- Clean up and change state

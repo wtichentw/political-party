@@ -45,10 +45,10 @@ var StageOver = function(game) {
     preload: function() {
 
       this.game.load.image(logoImagePath, logoImagePath);
-      this.game.load.image("backToMainMenu", "/media/ending/back_to_main_menu.png");
-      this.game.load.spritesheet("knowMoreBtn", "/media/ending/know_more_btn.png", btnWidth, btnHeight);
-      this.game.load.spritesheet("againBtn", "/media/ending/again_btn.png", btnWidth, btnHeight);
-      this.game.load.spritesheet("policyBtn", "/media/ending/policy_btn.png", btnWidth, btnHeight);
+      this.game.load.image("backToMainMenu", "./media/ending/back_to_main_menu.png");
+      this.game.load.spritesheet("knowMoreBtn", "./media/ending/know_more_btn.png", btnWidth, btnHeight);
+      this.game.load.spritesheet("againBtn", "./media/ending/again_btn.png", btnWidth, btnHeight);
+      this.game.load.spritesheet("policyBtn", "./media/ending/policy_btn.png", btnWidth, btnHeight);
 
     },
 
