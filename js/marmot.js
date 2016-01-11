@@ -372,7 +372,7 @@ var Marmot = function (game) {};
       game.load.image("sonWrong", "media/marmot/Wrong-Man.png");
       game.load.image("leaf", "media/marmot/Leaf.png");
       game.load.image("leafGrew", "media/marmot/Big-Leaf.png");
-      game.load.image("leafWrong", "media/marmot/Wrong-Leaf.png");
+      game.load.image("leafWrong", "media/marmot/Wrong-leaf.png");
       game.load.image("marmot", "media/marmot/Mouse.png");
       game.load.image("marmotAngry", "media/marmot/Angry-Mouse.png");
 
