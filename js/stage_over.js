@@ -22,6 +22,7 @@ var StageOver = function(game) {
         window.open(knowMoreUrl, "_blank");
         break;
       case againBtn:
+        alert('again');
         game.state.start(againState);
         break;
       case policyBtn:
@@ -33,7 +34,7 @@ var StageOver = function(game) {
   StageOver.prototype = {
 
     init: function(args) {
-
+      alert('init');
       logoImagePath = args.logoImagePath;
       score = args.score;
       againState = args.againState;
@@ -43,7 +44,7 @@ var StageOver = function(game) {
     },
 
     preload: function() {
-
+      alert('preload');
       this.game.load.image('logoImagePath', logoImagePath);
       this.game.load.image("backToMainMenu", "./media/ending/back_to_main_menu.png");
       this.game.load.spritesheet("knowMoreBtn", "./media/ending/know_more_btn.png", btnWidth, btnHeight);
@@ -53,6 +54,7 @@ var StageOver = function(game) {
     },
 
     create: function() {
+      alert('create');
 
       var gameOverSound;
 
