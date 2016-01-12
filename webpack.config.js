@@ -53,5 +53,8 @@ module.exports = {
       phaser: __dirname + '/lib/phaser/phaser.js',
       normalizeCss: __dirname + '/lib/normalize.css/normalize.css'
     }
+  },
+  devServer: {
+    contentBase: './dist'
   }
 };
