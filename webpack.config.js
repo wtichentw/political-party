@@ -4,7 +4,7 @@ module.exports = {
   output: {
     path: __dirname + '/dist',
     filename: 'bundle.js',
-    publicPath: '/'
+    publicPath: '/',
   },
   module: {
     loaders: [
@@ -17,10 +17,15 @@ module.exports = {
         }
       },
       {
+        test: /\.webm/,
+        include: __dirname + '/src/assets',
+        loader: 'file',
+      },
+      {
         test: /\.css$/,
         include: [
           __dirname + '/src',
-          __dirname + '/lib'
+          __dirname + '/lib',
         ],
         loader: 'style!css'
       },
@@ -29,21 +34,21 @@ module.exports = {
         include: __dirname + '/lib',
         loader: 'imports',
         query: {
-          PIXI: 'pixi'
+          PIXI: 'pixi',
         }
       },
       {
         test: /\.js$/,
         include: [
-          __dirname + '/src'
+          __dirname + '/src',
         ],
         exclude: [
-          __dirname + '/src/js'
+          __dirname + '/src/js',
         ],
         loader: 'babel',
         query: {
-          presets: ['es2015']
-        }
+          presets: ['es2015'],
+        },
       }
     ]
   },
@@ -51,10 +56,10 @@ module.exports = {
     alias: {
       pixi: __dirname + '/lib/phaser/pixi.js',
       phaser: __dirname + '/lib/phaser/phaser.js',
-      normalizeCss: __dirname + '/lib/normalize.css/normalize.css'
+      normalizeCss: __dirname + '/lib/normalize.css/normalize.css',
     }
   },
   devServer: {
-    contentBase: './dist'
-  }
+    contentBase: './dist',
+  },
 };
