@@ -13,8 +13,8 @@ module.exports = {
         include: __dirname + '/src/assets/fonts',
         loader: 'url',
         query: {
-          mimetype: 'font/woff2'
-        }
+          mimetype: 'font/woff2',
+        },
       },
       {
         test: /\.webm/,
@@ -22,12 +22,20 @@ module.exports = {
         loader: 'file',
       },
       {
+        test: /\.png/,
+        include: __dirname + '/src/assets',
+        loader: 'url',
+        query: {
+          mimetype: 'image/png',
+        },
+      },
+      {
         test: /\.css$/,
         include: [
           __dirname + '/src',
           __dirname + '/lib',
         ],
-        loader: 'style!css'
+        loader: 'style!css',
       },
       {
         test: /phaser\.js$/,
@@ -35,7 +43,7 @@ module.exports = {
         loader: 'imports',
         query: {
           PIXI: 'pixi',
-        }
+        },
       },
       {
         test: /\.js$/,
@@ -49,15 +57,15 @@ module.exports = {
         query: {
           presets: ['es2015'],
         },
-      }
-    ]
+      },
+    ],
   },
   resolve: {
     alias: {
       pixi: __dirname + '/lib/phaser/pixi.js',
       phaser: __dirname + '/lib/phaser/phaser.js',
       normalizeCss: __dirname + '/lib/normalize.css/normalize.css',
-    }
+    },
   },
   devServer: {
     contentBase: './dist',
