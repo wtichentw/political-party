@@ -16,7 +16,7 @@ class Boot extends Phaser.State {
     this.scale.pageAlignHorizontally = true;
     this.scale.pageAlignVertically = true;
 
-    this.game.state.start(
+    this.state.start(
       'IntroVideo',
       true,
       false,

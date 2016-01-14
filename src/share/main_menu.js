@@ -1,3 +1,4 @@
+import introVideoPath from '../assets/sit_tight/intro.webm';
 import bgImagePath from '../assets/main_menu/bg.png';
 import pigImagePath from '../assets/main_menu/pig.png';
 import engImagePath from '../assets/main_menu/eng.png';
@@ -36,8 +37,8 @@ class MainMenu extends Phaser.State {
       creditBuildingImagePath
     );
 
-    const creditImageX = this.world.centerX;
-    const creditImageY = this.world.centerY;
+    const creditImageX = this.game.width / 2;
+    const creditImageY = this.game.height / 2;
     const creditImage = this.add.image(creditImageX, creditImageY, creditImagePath);
     creditImage.anchor.set(0.5);
     creditImage.scale.set(0.7);
@@ -128,6 +129,27 @@ class MainMenu extends Phaser.State {
       creditImageTween.onComplete.add(() => {
         this.world.bringToTop(mainLayer);
       });
+    });
+
+    pigImage.events.onInputDown.add(() => {
+      this.state.start(
+        'StageIntro',
+        true,
+        false,
+        {
+          title: '第一話｜坐好坐滿',
+          subtitle: '在我任期內，一定會坐好坐滿。',
+          nextState: {
+            key: 'IntroVideo',
+            args: {
+              videoPath: introVideoPath,
+              nextState: {
+                key: 'MainMenu',
+              },
+            },
+          },
+        }
+      );
     });
   }
 }

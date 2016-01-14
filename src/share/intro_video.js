@@ -21,12 +21,17 @@ class IntroVideo extends Phaser.State {
     introVideo.play();
     introVideo.onComplete.add(() => {
       introVideo.stop();
-      introVideo.game.state.start('MainMenu');
+      this.state.start(
+        this.nextState.key,
+        true,
+        false,
+        this.nextState.args
+      );
     });
 
     const skipText = this.add.text(
-      this.camera.width,
-      this.camera.height,
+      this.game.width,
+      this.game.height,
       'Skip',
       {
         font: '25px Arial',
@@ -37,7 +42,12 @@ class IntroVideo extends Phaser.State {
     skipText.inputEnabled = true;
     skipText.events.onInputDown.add(() => {
       introVideo.stop();
-      introVideo.game.state.start('MainMenu');
+      this.state.start(
+        this.nextState.key,
+        true,
+        false,
+        this.nextState.args
+      );
     });
   }
 }
